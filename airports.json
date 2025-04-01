@@ -1,0 +1,15 @@
+{"airport_id": 1, "iata_code": "JFK", "airport_name": "John F. Kennedy International", "city": "New York", "country": "USA"}
+{"airport_id": 2, "iata_code": "YYZ", "airport_name": "Toronto Pearson International", "city": "Toronto", "country": "Canada"}
+{"airport_id": 3, "iata_code": "LHR", "airport_name": "London Heathrow", "city": "London", "country": "UK"}
+{"airport_id": 4, "iata_code": "SYD", "airport_name": "Sydney Kingsford Smith", "city": "Sydney", "country": "Australia"}
+{"airport_id": 5, "iata_code": "BER", "airport_name": "Berlin Brandenburg", "city": "Berlin", "country": "Germany"}
+{"airport_id": 6, "iata_code": "CDG", "airport_name": "Charles de Gaulle", "city": "Paris", "country": "France"}
+{"airport_id": 7, "iata_code": "FCO", "airport_name": "Leonardo da Vinci", "city": "Rome", "country": "Italy"}
+{"airport_id": 8, "iata_code": "MAD", "airport_name": "Adolfo Suarez Madrid-Barajas", "city": "Madrid", "country": "Spain"}
+{"airport_id": 9, "iata_code": "HND", "airport_name": "Tokyo Haneda", "city": "Tokyo", "country": "Japan"}
+{"airport_id": 10, "iata_code": "DEL", "airport_name": "Indira Gandhi International", "city": "Delhi", "country": "India"}
+{"airport_id": 11, "iata_code": "DXB", "airport_name": "Dubai International", "city": "Dubai", "country": "UAE"}
+{"airport_id": 12, "iata_code": "SIN", "airport_name": "Changi Airport", "city": "Singapore", "country": "Singapore"}
+{"airport_id": 13, "iata_code": "HKG", "airport_name": "Hong Kong International", "city": "Hong Kong", "country": "China"}
+{"airport_id": 14, "iata_code": "LAX", "airport_name": "Los Angeles International", "city": "Los Angeles", "country": "USA"}
+{"airport_id": 15, "iata_code": "BOM", "airport_name": "Chhatrapati Shivaji Maharaj International", "city": "Mumbai", "country": "India"}

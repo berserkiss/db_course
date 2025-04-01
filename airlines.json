@@ -1,0 +1,10 @@
+{"airline_id": 1, "iata_code": "AA", "airline_name": "American Airlines", "country": "USA", "base_airport_id": 1}
+{"airline_id": 2, "iata_code": "AC", "airline_name": "Air Canada", "country": "Canada", "base_airport_id": 2}
+{"airline_id": 3, "iata_code": "BA", "airline_name": "British Airways", "country": "UK", "base_airport_id": 3}
+{"airline_id": 4, "iata_code": "QF", "airline_name": "Qantas Airways", "country": "Australia", "base_airport_id": 4}
+{"airline_id": 5, "iata_code": "LH", "airline_name": "Lufthansa", "country": "Germany", "base_airport_id": 5}
+{"airline_id": 6, "iata_code": "AF", "airline_name": "Air France", "country": "France", "base_airport_id": 6}
+{"airline_id": 7, "iata_code": "AZ", "airline_name": "Alitalia", "country": "Italy", "base_airport_id": 7}
+{"airline_id": 8, "iata_code": "IB", "airline_name": "Iberia", "country": "Spain", "base_airport_id": 8}
+{"airline_id": 9, "iata_code": "JL", "airline_name": "Japan Airlines", "country": "Japan", "base_airport_id": 9}
+{"airline_id": 10, "iata_code": "AI", "airline_name": "Air India", "country": "India", "base_airport_id": 10}

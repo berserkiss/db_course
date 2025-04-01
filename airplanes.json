@@ -1,0 +1,11 @@
+{"airplane_id": 1, "type_id": 1, "airline_id": 1, "tail_number": "N737AA", "airplane_status": "Active"}
+{"airplane_id": 2, "type_id": 3, "airline_id": 2, "tail_number": "C320AC", "airplane_status": "Active"}
+{"airplane_id": 3, "type_id": 2, "airline_id": 3, "tail_number": "G777BA", "airplane_status": "Maintenance"}
+{"airplane_id": 4, "type_id": 4, "airline_id": 4, "tail_number": "VH380QF", "airplane_status": "Active"}
+{"airplane_id": 5, "type_id": 8, "airline_id": 5, "tail_number": "D787LH", "airplane_status": "Active"}
+{"airplane_id": 6, "type_id": 6, "airline_id": 6, "tail_number": "FCRJAF", "airplane_status": "Maintenance"}
+{"airplane_id": 7, "type_id": 7, "airline_id": 7, "tail_number": "IMD11AZ", "airplane_status": "Active"}
+{"airplane_id": 8, "type_id": 5, "airline_id": 8, "tail_number": "EC195IB", "airplane_status": "Retired"}
+{"airplane_id": 9, "type_id": 9, "airline_id": 9, "tail_number": "JA330JL", "airplane_status": "Active"}
+{"airplane_id": 10, "type_id": 10, "airline_id": 10, "tail_number": "VT001AI", "airplane_status": "Retired"}
+{"airplane_id": 11, "type_id": 12, "airline_id": 10, "tail_number": "VT001AK", "airplane_status": "Active"}

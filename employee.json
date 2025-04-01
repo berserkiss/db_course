@@ -1,0 +1,5 @@
+{"employee_id": 1, "user_id": 11, "airport_id": 3, "job_title": "Screening agent", "hire_date": "2022-03-25", "salary": 45000}
+{"employee_id": 2, "user_id": 12, "airport_id": 1, "job_title": "Manager", "hire_date": "2020-06-15", "salary": 80000}
+{"employee_id": 3, "user_id": 13, "airport_id": 2, "job_title": "Customs Officer", "hire_date": "2018-07-20", "salary": 90000}
+{"employee_id": 4, "user_id": 14, "airport_id": 1, "job_title": "Manager", "hire_date": "2021-01-10", "salary": 50000}
+{"employee_id": 5, "user_id": 15, "airport_id": 2, "job_title": "Customs Officer", "hire_date": "2019-12-05", "salary": 40000}

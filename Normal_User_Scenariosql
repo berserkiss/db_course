@@ -1,0 +1,65 @@
+BEGIN
+    admin.sp_register_user(
+        p_username => 'jane_smith',
+        p_user_password => 'password1',
+        p_email => 'jane.smith@example.com',
+        p_passport_number => 'AB1234567',
+        p_firstname => 'Jane',
+        p_lastname => 'Smith',
+        p_birthdate => TO_DATE('1985-10-20', 'YYYY-MM-DD')
+    );
+END;
+/
+
+BEGIN
+    admin.sp_login_user(
+        p_username => 'user13', -- Логин, email или телефон
+        p_user_password => 'password13'
+    );
+END;
+/
+
+BEGIN
+    admin.sp_get_user_info(4); -- Здесь указывается ID пользователя
+END;
+
+EXEC admin.sp_user_search_available_flights();
+
+BEGIN
+    sp_user_search_available_flights(
+         p_arrival_country => 'USA'
+    );
+END;
+/
+
+BEGIN
+    admin.view_available_tickets(p_flight_id => 20);
+END;
+/
+
+BEGIN
+    admin.search_tickets(
+        p_flight_id => 6,
+        p_class     => 'Economy'
+    );
+END;
+/
+
+BEGIN
+    -- Вызов процедуры 'book_ticket'
+    book_ticket(
+        p_user_id => 5, -- ID пользователя
+        p_flight_id => 6, -- ID рейса
+        p_class => 'Economy', -- Класс билета
+        p_seat_number => '20E' -- Номер места
+    );
+END;
+/
+
+BEGIN
+    admin.sp_cancel_ticket_booking(
+        p_user_id => 1,
+        p_ticket_id => 38
+    ); 
+END;
+/
