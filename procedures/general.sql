@@ -1,4 +1,4 @@
---регистрация 
+--СЂРµРіРёСЃС‚СЂР°С†РёСЏ 
 
 
 CREATE OR REPLACE PROCEDURE sp_register_user (
@@ -129,21 +129,21 @@ AS
     v_masked_phone NVARCHAR2(2000);
     v_is_employee BOOLEAN := FALSE;
 
-    -- Поля для таблицы Employee
+    -- РџРѕР»СЏ РґР»СЏ С‚Р°Р±Р»РёС†С‹ Employee
     v_job_title NVARCHAR2(100);
     v_airport_id NUMBER;
     v_airport_name NVARCHAR2(200);
     v_hire_date DATE;
     v_salary NUMBER;
 BEGIN
-    -- Проверяем, существует ли пользователь
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ
     DBMS_OUTPUT.PUT_LINE('Checking if user exists...');
     SELECT user_id
     INTO v_user_id
     FROM admin.Users
     WHERE username = p_username;
 
-    -- Получаем данные пользователя
+    -- РџРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     DBMS_OUTPUT.PUT_LINE('Fetching user data...');
     SELECT user_password, passport_number, firstname, lastname, city, street, is_active, email, phone, birthdate, country
     INTO v_encrypted_user_password, v_encrypted_passport_number, v_encrypted_firstname,
@@ -152,31 +152,31 @@ BEGIN
     FROM admin.Users
     WHERE username = p_username;
 
-    -- Проверяем активен ли аккаунт
+    -- РџСЂРѕРІРµСЂСЏРµРј Р°РєС‚РёРІРµРЅ Р»Рё Р°РєРєР°СѓРЅС‚
     IF v_is_active = 0 THEN
         RAISE_APPLICATION_ERROR(-20003, 'Account is inactive. Please contact support.');
     END IF;
 
-    -- Расшифровываем пароль и личные данные
+    -- Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј РїР°СЂРѕР»СЊ Рё Р»РёС‡РЅС‹Рµ РґР°РЅРЅС‹Рµ
     DBMS_OUTPUT.PUT_LINE('Decrypting user data...');
     v_decrypted_user_password := admin.pkg_crypto_utils.decrypt_data(v_encrypted_user_password);
     v_decrypted_firstname := admin.pkg_crypto_utils.decrypt_data(v_encrypted_firstname);
     v_decrypted_lastname := admin.pkg_crypto_utils.decrypt_data(v_encrypted_lastname);
     v_decrypted_passport_number := admin.pkg_crypto_utils.decrypt_data(v_encrypted_passport_number);
 
-    -- Расшифровываем опциональные поля
+    -- Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј РѕРїС†РёРѕРЅР°Р»СЊРЅС‹Рµ РїРѕР»СЏ
     v_decrypted_city := CASE WHEN v_encrypted_city IS NOT NULL THEN admin.pkg_crypto_utils.decrypt_data(v_encrypted_city) ELSE NULL END;
     v_decrypted_street := CASE WHEN v_encrypted_street IS NOT NULL THEN admin.pkg_crypto_utils.decrypt_data(v_encrypted_street) ELSE NULL END;
 
-    -- Маскируем email и телефон
+    -- РњР°СЃРєРёСЂСѓРµРј email Рё С‚РµР»РµС„РѕРЅ
     v_masked_email := REGEXP_REPLACE(v_encrypted_email, '(.).+(@.+)', '\1*****\2');
     v_masked_phone := RPAD(SUBSTR(v_encrypted_phone, -4), LENGTH(v_encrypted_phone), '*');
 
-    -- Проверяем соответствие пароля
+    -- РџСЂРѕРІРµСЂСЏРµРј СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ РїР°СЂРѕР»СЏ
     IF v_decrypted_user_password = p_user_password THEN
         DBMS_OUTPUT.PUT_LINE('Login successful');
         
-        -- Выводим информацию о пользователе
+        -- Р’С‹РІРѕРґРёРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ
         DBMS_OUTPUT.PUT_LINE('Username: ' || p_username);
         DBMS_OUTPUT.PUT_LINE('Email: ' || v_masked_email);
         DBMS_OUTPUT.PUT_LINE('Passport Number: ' || v_decrypted_passport_number);
@@ -209,7 +209,7 @@ BEGIN
             DBMS_OUTPUT.PUT_LINE('Street: Not Provided');
         END IF;
 
-        -- Проверяем, является ли пользователь сотрудником
+        -- РџСЂРѕРІРµСЂСЏРµРј, СЏРІР»СЏРµС‚СЃСЏ Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃРѕС‚СЂСѓРґРЅРёРєРѕРј
         BEGIN
             DBMS_OUTPUT.PUT_LINE('Checking if user is an employee...');
             SELECT e.job_title, e.airport_id, a.airport_name, e.hire_date, e.salary
@@ -226,7 +226,7 @@ BEGIN
                 v_is_employee := FALSE;
         END;
 
-        -- Выводим информацию о сотруднике, если он найден
+        -- Р’С‹РІРѕРґРёРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ СЃРѕС‚СЂСѓРґРЅРёРєРµ, РµСЃР»Рё РѕРЅ РЅР°Р№РґРµРЅ
         IF v_is_employee THEN
             DBMS_OUTPUT.PUT_LINE('Employee Details:');
             DBMS_OUTPUT.PUT_LINE('  Job Title: ' || v_job_title);
@@ -240,10 +240,10 @@ BEGIN
 
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
-        -- Пользователь не найден
+        -- РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ
         RAISE_APPLICATION_ERROR(-20002, 'Invalid username or password.');
     WHEN OTHERS THEN
-        -- Логирование и обработка ошибок
+        -- Р›РѕРіРёСЂРѕРІР°РЅРёРµ Рё РѕР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РѕРє
         DBMS_OUTPUT.PUT_LINE('Error during login: ' || SQLERRM);
         RAISE;
 END;
@@ -253,7 +253,7 @@ END;
 
 BEGIN
     admin.sp_login_user(
-        p_username => 'jane_smith', -- Логин, email или телефон
+        p_username => 'jane_smith', -- Р›РѕРіРёРЅ, email РёР»Рё С‚РµР»РµС„РѕРЅ
         p_user_password => 'password1'
     );
 END;
@@ -261,7 +261,7 @@ END;
 
 select * from Users;
 
---заменить на айди
+--Р·Р°РјРµРЅРёС‚СЊ РЅР° Р°Р№РґРё
 --get user info
 CREATE OR REPLACE PROCEDURE sp_get_user_info(
     p_user_id IN NUMBER 
@@ -269,7 +269,7 @@ CREATE OR REPLACE PROCEDURE sp_get_user_info(
 AS
     user_exists NUMBER;
 BEGIN
-    -- Проверка на существование пользователя
+    -- РџСЂРѕРІРµСЂРєР° РЅР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     SELECT COUNT(*)
     INTO user_exists
     FROM admin.Users_View
@@ -279,7 +279,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20002, 'User with the specified ID does not exist.');
     END IF;
 
-    -- Получение информации о пользователе
+    -- РџРѕР»СѓС‡РµРЅРёРµ РёРЅС„РѕСЂРјР°С†РёРё Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ
     FOR user_data IN (
         SELECT username, email, phone, firstname, lastname, birthdate, country, city, street, passport_number
         FROM admin.Users_View
@@ -291,7 +291,7 @@ BEGIN
         
         DBMS_OUTPUT.PUT_LINE('Passport Number: ' || user_data.passport_number);
 
-        -- Проверка на NULL для остальных полей
+        -- РџСЂРѕРІРµСЂРєР° РЅР° NULL РґР»СЏ РѕСЃС‚Р°Р»СЊРЅС‹С… РїРѕР»РµР№
         IF user_data.phone IS NOT NULL THEN
             DBMS_OUTPUT.PUT_LINE('Phone: ' || user_data.phone);
         ELSE
@@ -333,7 +333,7 @@ END;
 /
 
 BEGIN
-    admin.sp_get_user_info(4); -- Здесь указывается ID пользователя
+    admin.sp_get_user_info(4); -- Р—РґРµСЃСЊ СѓРєР°Р·С‹РІР°РµС‚СЃСЏ ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 END;
 
 
@@ -385,20 +385,20 @@ AS
     flight_record flight_cursor%ROWTYPE;
 
 BEGIN
-    -- Проверка и преобразование даты вылета
+    -- РџСЂРѕРІРµСЂРєР° Рё РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РґР°С‚С‹ РІС‹Р»РµС‚Р°
     IF p_departure_date_str IS NOT NULL THEN
         BEGIN
             SELECT TO_TIMESTAMP(p_departure_date_str, 'YYYY-MM-DD HH24:MI') 
             INTO v_departure_timestamp 
             FROM dual;
 
-            -- Проверка, что дата вылета не меньше текущей даты
+            -- РџСЂРѕРІРµСЂРєР°, С‡С‚Рѕ РґР°С‚Р° РІС‹Р»РµС‚Р° РЅРµ РјРµРЅСЊС€Рµ С‚РµРєСѓС‰РµР№ РґР°С‚С‹
             IF v_departure_timestamp < SYSTIMESTAMP THEN
                 DBMS_OUTPUT.PUT_LINE('Error: Departure date and time cannot be in the past.');
                 RETURN;
             END IF;
 
-            -- Вычисление начала и конца дня для даты вылета
+            -- Р’С‹С‡РёСЃР»РµРЅРёРµ РЅР°С‡Р°Р»Р° Рё РєРѕРЅС†Р° РґРЅСЏ РґР»СЏ РґР°С‚С‹ РІС‹Р»РµС‚Р°
             v_departure_day_start := TRUNC(v_departure_timestamp);
             v_departure_day_end := v_departure_day_start + INTERVAL '1' DAY - INTERVAL '1' SECOND;
 
@@ -408,7 +408,7 @@ BEGIN
         END;
     END IF;
 
-    -- Проверка и преобразование даты прилета
+    -- РџСЂРѕРІРµСЂРєР° Рё РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РґР°С‚С‹ РїСЂРёР»РµС‚Р°
     IF p_arrival_date_str IS NOT NULL THEN
         BEGIN
             IF INSTR(p_arrival_date_str, ' ') = 0 THEN
@@ -421,13 +421,13 @@ BEGIN
             INTO v_arrival_timestamp 
             FROM dual;
 
-            -- Проверка, что дата прилета не меньше текущей даты
+            -- РџСЂРѕРІРµСЂРєР°, С‡С‚Рѕ РґР°С‚Р° РїСЂРёР»РµС‚Р° РЅРµ РјРµРЅСЊС€Рµ С‚РµРєСѓС‰РµР№ РґР°С‚С‹
             IF v_arrival_timestamp < SYSTIMESTAMP THEN
                 DBMS_OUTPUT.PUT_LINE('Error: Arrival date and time cannot be in the past.');
                 RETURN;
             END IF;
 
-            -- Вычисление начала и конца дня для даты прилета
+            -- Р’С‹С‡РёСЃР»РµРЅРёРµ РЅР°С‡Р°Р»Р° Рё РєРѕРЅС†Р° РґРЅСЏ РґР»СЏ РґР°С‚С‹ РїСЂРёР»РµС‚Р°
             v_arrival_day_start := TRUNC(v_arrival_timestamp);
             v_arrival_day_end := v_arrival_day_start + INTERVAL '1' DAY - INTERVAL '1' SECOND;
 
@@ -437,7 +437,7 @@ BEGIN
         END;
     END IF;
 
-    -- Открытие курсора и получение данных
+    -- РћС‚РєСЂС‹С‚РёРµ РєСѓСЂСЃРѕСЂР° Рё РїРѕР»СѓС‡РµРЅРёРµ РґР°РЅРЅС‹С…
     OPEN flight_cursor;
 
     FETCH flight_cursor INTO flight_record;
@@ -553,11 +553,11 @@ CREATE OR REPLACE PROCEDURE search_tickets (
     p_price_min IN NUMBER DEFAULT NULL,
     p_price_max IN NUMBER DEFAULT NULL
 ) AUTHID DEFINER AS
-    v_departure_time TIMESTAMP; -- Время отправления рейса
-    v_flight_exists NUMBER; -- Проверка существования рейса
-    v_flight_number VARCHAR2(50); -- Номер рейса
+    v_departure_time TIMESTAMP; -- Р’СЂРµРјСЏ РѕС‚РїСЂР°РІР»РµРЅРёСЏ СЂРµР№СЃР°
+    v_flight_exists NUMBER; -- РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ СЂРµР№СЃР°
+    v_flight_number VARCHAR2(50); -- РќРѕРјРµСЂ СЂРµР№СЃР°
 BEGIN
-    -- Проверка на существование рейса
+    -- РџСЂРѕРІРµСЂРєР° РЅР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ СЂРµР№СЃР°
     SELECT COUNT(*)
     INTO v_flight_exists
     FROM admin.Flights
@@ -568,7 +568,7 @@ BEGIN
         RETURN;
     END IF;
 
-    -- Получение номера рейса
+    -- РџРѕР»СѓС‡РµРЅРёРµ РЅРѕРјРµСЂР° СЂРµР№СЃР°
     BEGIN
         SELECT flight_number, departure_time
         INTO v_flight_number, v_departure_time
@@ -585,11 +585,11 @@ BEGIN
             RETURN;
     END;
 
-    -- Вывод номера рейса
+    -- Р’С‹РІРѕРґ РЅРѕРјРµСЂР° СЂРµР№СЃР°
     DBMS_OUTPUT.PUT_LINE('Searching tickets for Flight Number ' || v_flight_number || ':');
     DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------');
 
-    -- Локальный флаг для проверки наличия билетов
+    -- Р›РѕРєР°Р»СЊРЅС‹Р№ С„Р»Р°Рі РґР»СЏ РїСЂРѕРІРµСЂРєРё РЅР°Р»РёС‡РёСЏ Р±РёР»РµС‚РѕРІ
     DECLARE
         v_tickets_found BOOLEAN := FALSE;
     BEGIN
@@ -610,7 +610,7 @@ BEGIN
                                  ', Status: ' || rec.ticket_status);
         END LOOP;
 
-        -- Если билеты не найдены, выводим сообщение
+        -- Р•СЃР»Рё Р±РёР»РµС‚С‹ РЅРµ РЅР°Р№РґРµРЅС‹, РІС‹РІРѕРґРёРј СЃРѕРѕР±С‰РµРЅРёРµ
         IF NOT v_tickets_found THEN
             DBMS_OUTPUT.PUT_LINE('No tickets found matching the specified criteria.');
         END IF;
@@ -764,12 +764,12 @@ END book_ticket;
 
 
 BEGIN
-    -- Вызов процедуры 'book_ticket'
+    -- Р’С‹Р·РѕРІ РїСЂРѕС†РµРґСѓСЂС‹ 'book_ticket'
     book_ticket(
-        p_user_id => 5, -- ID пользователя
-        p_flight_id => 20, -- ID рейса
-        p_class => 'Business', -- Класс билета
-        p_seat_number => '20E' -- Номер места
+        p_user_id => 5, -- ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+        p_flight_id => 20, -- ID СЂРµР№СЃР°
+        p_class => 'Business', -- РљР»Р°СЃСЃ Р±РёР»РµС‚Р°
+        p_seat_number => '20E' -- РќРѕРјРµСЂ РјРµСЃС‚Р°
     );
 END;
 /

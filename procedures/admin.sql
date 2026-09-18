@@ -3,13 +3,13 @@ CREATE OR REPLACE TRIGGER trg_flight_number_generation
 BEFORE INSERT OR UPDATE ON Flights
 FOR EACH ROW
 BEGIN
-    -- Проверяем, что значение flight_id в пределах допустимого диапазона
+    -- РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ Р·РЅР°С‡РµРЅРёРµ flight_id РІ РїСЂРµРґРµР»Р°С… РґРѕРїСѓСЃС‚РёРјРѕРіРѕ РґРёР°РїР°Р·РѕРЅР°
     IF :NEW.flight_id > 999999 THEN
          DBMS_OUTPUT.PUT_LINE('Error: ticket_id exceeds the maximum allowed value.');
         RAISE_APPLICATION_ERROR(-20001, 'flight_id exceeds the maximum allowed value.');
     END IF;
 
-    -- Генерация номера рейса
+    -- Р“РµРЅРµСЂР°С†РёСЏ РЅРѕРјРµСЂР° СЂРµР№СЃР°
     :NEW.flight_number := 'FLIGHT-' || LPAD(TO_CHAR(:NEW.flight_id), 6, '0');
 END;
 /
@@ -18,14 +18,14 @@ CREATE OR REPLACE TRIGGER trg_ticket_number_generation
 BEFORE INSERT OR UPDATE ON Tickets
 FOR EACH ROW
 BEGIN
-    -- Проверка, что ticket_id не превышает допустимое значение
+    -- РџСЂРѕРІРµСЂРєР°, С‡С‚Рѕ ticket_id РЅРµ РїСЂРµРІС‹С€Р°РµС‚ РґРѕРїСѓСЃС‚РёРјРѕРµ Р·РЅР°С‡РµРЅРёРµ
     IF :NEW.ticket_id > 999999 THEN
-        -- Вывод ошибки через DBMS_OUTPUT
+        -- Р’С‹РІРѕРґ РѕС€РёР±РєРё С‡РµСЂРµР· DBMS_OUTPUT
         DBMS_OUTPUT.PUT_LINE('Error: ticket_id exceeds the maximum allowed value.');
-        -- Исключение
+        -- РСЃРєР»СЋС‡РµРЅРёРµ
         RAISE_APPLICATION_ERROR(-20001, 'ticket_id exceeds the maximum allowed value.');
     ELSE
-        -- Генерация номера билета
+        -- Р“РµРЅРµСЂР°С†РёСЏ РЅРѕРјРµСЂР° Р±РёР»РµС‚Р°
         :NEW.ticket_number := 'TICKET-' || LPAD(:NEW.ticket_id, 6, '0');
     END IF;
 END;
@@ -51,14 +51,14 @@ CREATE PACKAGE BODY pkg_crypto_utils AS
         l_encrypted_data RAW(2000);
         l_base64_data NVARCHAR2(2000);
     BEGIN
-        -- Преобразуем входные данные в RAW
+        -- РџСЂРµРѕР±СЂР°Р·СѓРµРј РІС…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ РІ RAW
         l_encrypted_data := DBMS_CRYPTO.ENCRYPT(
             UTL_I18N.STRING_TO_RAW(p_data, 'AL32UTF8'),
             ctype,
             key
         );
 
-        -- Кодируем зашифрованные данные в Base64
+        -- РљРѕРґРёСЂСѓРµРј Р·Р°С€РёС„СЂРѕРІР°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ РІ Base64
         l_base64_data := UTL_I18N.RAW_TO_CHAR(UTL_ENCODE.BASE64_ENCODE(l_encrypted_data), 'AL32UTF8');
 
         RETURN l_base64_data;
@@ -69,17 +69,17 @@ CREATE PACKAGE BODY pkg_crypto_utils AS
         l_decrypted_data RAW(2000);
         l_plain_text NVARCHAR2(2000);
     BEGIN
-        -- Декодируем Base64 в RAW
+        -- Р”РµРєРѕРґРёСЂСѓРµРј Base64 РІ RAW
         l_encrypted_data := UTL_ENCODE.BASE64_DECODE(UTL_I18N.STRING_TO_RAW(p_encrypted_data, 'AL32UTF8'));
 
-        -- Дешифруем данные
+        -- Р”РµС€РёС„СЂСѓРµРј РґР°РЅРЅС‹Рµ
         l_decrypted_data := DBMS_CRYPTO.DECRYPT(
             l_encrypted_data,
             ctype,
             key
         );
 
-        -- Преобразуем RAW в текст
+        -- РџСЂРµРѕР±СЂР°Р·СѓРµРј RAW РІ С‚РµРєСЃС‚
         l_plain_text := UTL_I18N.RAW_TO_NCHAR(l_decrypted_data, 'AL32UTF8');
 
         RETURN l_plain_text;
@@ -94,58 +94,58 @@ DROP PACKAGE pkg_crypto_utils;
 
 CREATE OR REPLACE VIEW Users_View AS
 SELECT 
-    user_id, -- ID пользователя
+    user_id, -- ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     username,
-    -- Маскировка email (оставляем первую букву и домен)
+    -- РњР°СЃРєРёСЂРѕРІРєР° email (РѕСЃС‚Р°РІР»СЏРµРј РїРµСЂРІСѓСЋ Р±СѓРєРІСѓ Рё РґРѕРјРµРЅ)
     REGEXP_REPLACE(email, '(.).+(@.+)', '\1*****\2') AS email,
-    -- Маскировка phone (оставляем последние 4 цифры, остальные заменяются на *)
+    -- РњР°СЃРєРёСЂРѕРІРєР° phone (РѕСЃС‚Р°РІР»СЏРµРј РїРѕСЃР»РµРґРЅРёРµ 4 С†РёС„СЂС‹, РѕСЃС‚Р°Р»СЊРЅС‹Рµ Р·Р°РјРµРЅСЏСЋС‚СЃСЏ РЅР° *)
     RPAD(SUBSTR(phone, -4), LENGTH(phone), '*') AS phone,
     is_active,
     admin.pkg_crypto_utils.decrypt_data(firstname) AS firstname,
     admin.pkg_crypto_utils.decrypt_data(lastname) AS lastname,
-    -- Маскировка даты рождения в формате xx.xx.yy
+    -- РњР°СЃРєРёСЂРѕРІРєР° РґР°С‚С‹ СЂРѕР¶РґРµРЅРёСЏ РІ С„РѕСЂРјР°С‚Рµ xx.xx.yy
     TO_CHAR(birthdate, '"xx.xx."YY') AS birthdate,
     country,
-    -- Дешифровка города только если он не NULL
+    -- Р”РµС€РёС„СЂРѕРІРєР° РіРѕСЂРѕРґР° С‚РѕР»СЊРєРѕ РµСЃР»Рё РѕРЅ РЅРµ NULL
     CASE 
         WHEN city IS NOT NULL THEN admin.pkg_crypto_utils.decrypt_data(city) 
         ELSE NULL 
     END AS city,
-    -- Дешифровка улицы только если она не NULL
+    -- Р”РµС€РёС„СЂРѕРІРєР° СѓР»РёС†С‹ С‚РѕР»СЊРєРѕ РµСЃР»Рё РѕРЅР° РЅРµ NULL
     CASE 
         WHEN street IS NOT NULL THEN admin.pkg_crypto_utils.decrypt_data(street) 
         ELSE NULL 
     END AS street,
-    -- Дешифровка номера паспорта
+    -- Р”РµС€РёС„СЂРѕРІРєР° РЅРѕРјРµСЂР° РїР°СЃРїРѕСЂС‚Р°
     admin.pkg_crypto_utils.decrypt_data(passport_number) AS passport_number
 FROM Users;
 
 
 CREATE OR REPLACE VIEW Users_View AS
 SELECT 
-    user_id, -- ID пользователя
+    user_id, -- ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     username,
-    -- Маскировка email (оставляем первую букву и домен)
+    -- РњР°СЃРєРёСЂРѕРІРєР° email (РѕСЃС‚Р°РІР»СЏРµРј РїРµСЂРІСѓСЋ Р±СѓРєРІСѓ Рё РґРѕРјРµРЅ)
     REGEXP_REPLACE(email, '(.).+(@.+)', '\1*****\2') AS email,
-    -- Маскировка phone (оставляем последние 4 цифры, остальные заменяются на *)
+    -- РњР°СЃРєРёСЂРѕРІРєР° phone (РѕСЃС‚Р°РІР»СЏРµРј РїРѕСЃР»РµРґРЅРёРµ 4 С†РёС„СЂС‹, РѕСЃС‚Р°Р»СЊРЅС‹Рµ Р·Р°РјРµРЅСЏСЋС‚СЃСЏ РЅР° *)
     RPAD(SUBSTR(phone, -4), LENGTH(phone), '*') AS phone,
     is_active,
     admin.pkg_crypto_utils.decrypt_data(firstname) AS firstname,
     admin.pkg_crypto_utils.decrypt_data(lastname) AS lastname,
-    -- Маскировка даты рождения в формате xx.xx.yy
+    -- РњР°СЃРєРёСЂРѕРІРєР° РґР°С‚С‹ СЂРѕР¶РґРµРЅРёСЏ РІ С„РѕСЂРјР°С‚Рµ xx.xx.yy
     TO_CHAR(birthdate, '"xx.xx."YY') AS birthdate,
     country,
-    -- Дешифровка города только если он не NULL
+    -- Р”РµС€РёС„СЂРѕРІРєР° РіРѕСЂРѕРґР° С‚РѕР»СЊРєРѕ РµСЃР»Рё РѕРЅ РЅРµ NULL
     CASE 
         WHEN city IS NOT NULL THEN admin.pkg_crypto_utils.decrypt_data(city) 
         ELSE NULL 
     END AS city,
-    -- Дешифровка улицы только если она не NULL
+    -- Р”РµС€РёС„СЂРѕРІРєР° СѓР»РёС†С‹ С‚РѕР»СЊРєРѕ РµСЃР»Рё РѕРЅР° РЅРµ NULL
     CASE 
         WHEN street IS NOT NULL THEN admin.pkg_crypto_utils.decrypt_data(street) 
         ELSE NULL 
     END AS street,
-    -- Дешифровка номера паспорта
+    -- Р”РµС€РёС„СЂРѕРІРєР° РЅРѕРјРµСЂР° РїР°СЃРїРѕСЂС‚Р°
     admin.pkg_crypto_utils.decrypt_data(passport_number) AS passport_number
 FROM Users;
 
@@ -159,39 +159,39 @@ BEGIN
                user_password AS password,
                email,
                admin.pkg_crypto_utils.decrypt_data(passport_number) AS decrypted_passport_number,
-               -- Проверяем, не является ли firstname NULL, если нет - расшифровываем
+               -- РџСЂРѕРІРµСЂСЏРµРј, РЅРµ СЏРІР»СЏРµС‚СЃСЏ Р»Рё firstname NULL, РµСЃР»Рё РЅРµС‚ - СЂР°СЃС€РёС„СЂРѕРІС‹РІР°РµРј
                CASE 
                    WHEN firstname IS NOT NULL THEN admin.pkg_crypto_utils.decrypt_data(firstname) 
                    ELSE NULL 
                END AS decrypted_firstname,
-               -- То же самое для lastname
+               -- РўРѕ Р¶Рµ СЃР°РјРѕРµ РґР»СЏ lastname
                CASE 
                    WHEN lastname IS NOT NULL THEN admin.pkg_crypto_utils.decrypt_data(lastname) 
                    ELSE NULL 
                END AS decrypted_lastname,
                birthdate, 
-               -- Если country NULL, заменяем на 'n/a'
+               -- Р•СЃР»Рё country NULL, Р·Р°РјРµРЅСЏРµРј РЅР° 'n/a'
                NVL(country, 'n/a') AS country,
-               -- Проверяем на NULL для city перед расшифровкой и заменяем на 'n/a' при необходимости
+               -- РџСЂРѕРІРµСЂСЏРµРј РЅР° NULL РґР»СЏ city РїРµСЂРµРґ СЂР°СЃС€РёС„СЂРѕРІРєРѕР№ Рё Р·Р°РјРµРЅСЏРµРј РЅР° 'n/a' РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё
                NVL(
                    CASE 
                        WHEN city IS NOT NULL THEN admin.pkg_crypto_utils.decrypt_data(city) 
                        ELSE NULL 
                    END, 'n/a'
                ) AS decrypted_city,
-               -- То же самое для street
+               -- РўРѕ Р¶Рµ СЃР°РјРѕРµ РґР»СЏ street
                NVL(
                    CASE 
                        WHEN street IS NOT NULL THEN admin.pkg_crypto_utils.decrypt_data(street) 
                        ELSE NULL 
                    END, 'n/a'
                ) AS decrypted_street,
-               -- Если phone NULL, заменяем на 'n/a'
+               -- Р•СЃР»Рё phone NULL, Р·Р°РјРµРЅСЏРµРј РЅР° 'n/a'
                NVL(phone, 'n/a') AS phone
         FROM admin.Users
     )
     LOOP
-        -- Выводим расшифрованные данные для каждого пользователя
+        -- Р’С‹РІРѕРґРёРј СЂР°СЃС€РёС„СЂРѕРІР°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ РґР»СЏ РєР°Р¶РґРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
         DBMS_OUTPUT.PUT_LINE('User ID: ' || user_data.user_id);
         DBMS_OUTPUT.PUT_LINE('Username: ' || user_data.username);
         DBMS_OUTPUT.PUT_LINE('Password: ' || user_data.password);
@@ -221,26 +221,26 @@ EXEC sp_get_all_users_decrypted;
 
 
 CREATE OR REPLACE PROCEDURE sp_add_employee_with_user (
-    p_username        IN VARCHAR2,  -- Имя пользователя
-    p_user_password   IN VARCHAR2,  -- Пароль
+    p_username        IN VARCHAR2,  -- РРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+    p_user_password   IN VARCHAR2,  -- РџР°СЂРѕР»СЊ
     p_email           IN VARCHAR2,  -- Email
-    p_passport_number IN VARCHAR2,  -- Номер паспорта
-    p_phone           IN VARCHAR2 DEFAULT NULL, -- Телефон
-    p_firstname       IN VARCHAR2,  -- Имя
-    p_lastname        IN VARCHAR2,  -- Фамилия
-    p_birthdate       IN VARCHAR2,  -- Дата рождения (строка в формате 'YYYY-MM-DD')
-    p_country         IN VARCHAR2 DEFAULT NULL, -- Страна
-    p_city            IN VARCHAR2 DEFAULT NULL, -- Город
-    p_street          IN VARCHAR2 DEFAULT NULL, -- Улица
-    p_airport_id      IN NUMBER,    -- ID аэропорта
-    p_job_title       IN VARCHAR2,  -- Должность
-    p_hire_date       IN VARCHAR2,  -- Дата найма (строка в формате 'YYYY-MM-DD')
-    p_salary          IN NUMBER     -- Зарплата
+    p_passport_number IN VARCHAR2,  -- РќРѕРјРµСЂ РїР°СЃРїРѕСЂС‚Р°
+    p_phone           IN VARCHAR2 DEFAULT NULL, -- РўРµР»РµС„РѕРЅ
+    p_firstname       IN VARCHAR2,  -- РРјСЏ
+    p_lastname        IN VARCHAR2,  -- Р¤Р°РјРёР»РёСЏ
+    p_birthdate       IN VARCHAR2,  -- Р”Р°С‚Р° СЂРѕР¶РґРµРЅРёСЏ (СЃС‚СЂРѕРєР° РІ С„РѕСЂРјР°С‚Рµ 'YYYY-MM-DD')
+    p_country         IN VARCHAR2 DEFAULT NULL, -- РЎС‚СЂР°РЅР°
+    p_city            IN VARCHAR2 DEFAULT NULL, -- Р“РѕСЂРѕРґ
+    p_street          IN VARCHAR2 DEFAULT NULL, -- РЈР»РёС†Р°
+    p_airport_id      IN NUMBER,    -- ID Р°СЌСЂРѕРїРѕСЂС‚Р°
+    p_job_title       IN VARCHAR2,  -- Р”РѕР»Р¶РЅРѕСЃС‚СЊ
+    p_hire_date       IN VARCHAR2,  -- Р”Р°С‚Р° РЅР°Р№РјР° (СЃС‚СЂРѕРєР° РІ С„РѕСЂРјР°С‚Рµ 'YYYY-MM-DD')
+    p_salary          IN NUMBER     -- Р—Р°СЂРїР»Р°С‚Р°
 )
 AUTHID DEFINER
 AS
-    v_user_id NUMBER; -- ID зарегистрированного пользователя
-    v_airport_name NVARCHAR2(100); -- Название аэропорта
+    v_user_id NUMBER; -- ID Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+    v_airport_name NVARCHAR2(100); -- РќР°Р·РІР°РЅРёРµ Р°СЌСЂРѕРїРѕСЂС‚Р°
     v_duplicate_count NUMBER;
     v_hire_date DATE;
     v_birth_date DATE;
@@ -251,7 +251,7 @@ AS
     encrypted_city            VARCHAR2(50);
     encrypted_street          VARCHAR2(100);
 BEGIN
-    -- Преобразование строковых дат в формат DATE
+    -- РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ СЃС‚СЂРѕРєРѕРІС‹С… РґР°С‚ РІ С„РѕСЂРјР°С‚ DATE
     BEGIN
         v_hire_date := TO_DATE(p_hire_date, 'YYYY-MM-DD');
         v_birth_date := TO_DATE(p_birthdate, 'YYYY-MM-DD');
@@ -260,7 +260,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20001, 'Invalid date format. Use "YYYY-MM-DD".');
     END;
 
-    -- Проверка существования аэропорта
+    -- РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ Р°СЌСЂРѕРїРѕСЂС‚Р°
     BEGIN
         SELECT airport_name
         INTO v_airport_name
@@ -271,7 +271,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20002, 'Airport with ID ' || p_airport_id || ' does not exist.');
     END;
 
-    -- Проверка на дубликаты
+    -- РџСЂРѕРІРµСЂРєР° РЅР° РґСѓР±Р»РёРєР°С‚С‹
     BEGIN
         SELECT COUNT(*)
         INTO v_duplicate_count
@@ -289,12 +289,12 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20005, 'Error during duplicate check: ' || SQLERRM);
     END;
 
-    -- Шифрование обязательных полей
+    -- РЁРёС„СЂРѕРІР°РЅРёРµ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№
     encrypted_passport_number := admin.pkg_crypto_utils.encrypt_data(p_passport_number);
     encrypted_firstname := admin.pkg_crypto_utils.encrypt_data(p_firstname);
     encrypted_lastname := admin.pkg_crypto_utils.encrypt_data(p_lastname);
 
-    -- Шифрование необязательных полей
+    -- РЁРёС„СЂРѕРІР°РЅРёРµ РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№
     IF p_city IS NOT NULL THEN
         encrypted_city := admin.pkg_crypto_utils.encrypt_data(p_city);
     ELSE
@@ -307,7 +307,7 @@ BEGIN
         encrypted_street := NULL;
     END IF;
 
-    -- Добавление пользователя в Users
+    -- Р”РѕР±Р°РІР»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІ Users
     INSERT INTO admin.Users (
         username, user_password, email, phone, firstname, lastname, birthdate,
         country, city, street, passport_number
@@ -327,7 +327,7 @@ BEGIN
     )
     RETURNING user_id INTO v_user_id;
 
-    -- Проверка на дубликат сотрудника
+    -- РџСЂРѕРІРµСЂРєР° РЅР° РґСѓР±Р»РёРєР°С‚ СЃРѕС‚СЂСѓРґРЅРёРєР°
     SELECT COUNT(*)
     INTO v_duplicate_count
     FROM admin.Employee
@@ -337,18 +337,18 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20004, 'User with ID ' || v_user_id || ' is already an employee.');
     END IF;
 
-    -- Добавление сотрудника в Employee
+    -- Р”РѕР±Р°РІР»РµРЅРёРµ СЃРѕС‚СЂСѓРґРЅРёРєР° РІ Employee
     INSERT INTO admin.Employee (
         user_id, airport_id, job_title, hire_date, salary
     ) VALUES (
         v_user_id, p_airport_id, p_job_title, v_hire_date, p_salary
     );
 
-    -- Подтверждаем транзакцию
+    -- РџРѕРґС‚РІРµСЂР¶РґР°РµРј С‚СЂР°РЅР·Р°РєС†РёСЋ
     COMMIT;
 
-    -- Вывод информации о сотруднике
-    -- Вывод информации о сотруднике
+    -- Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЃРѕС‚СЂСѓРґРЅРёРєРµ
+    -- Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЃРѕС‚СЂСѓРґРЅРёРєРµ
     DBMS_OUTPUT.PUT_LINE('Employee successfully added:');
     DBMS_OUTPUT.PUT_LINE('---------------------------------');
     FOR emp_info IN (
@@ -431,10 +431,10 @@ CREATE OR REPLACE PROCEDURE sp_update_employee (
 AS
     v_employee_exists NUMBER;
     v_airport_exists NUMBER;
-    v_user_link_exists NUMBER; -- Проверка связи с таблицей Users
+    v_user_link_exists NUMBER; -- РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё СЃ С‚Р°Р±Р»РёС†РµР№ Users
     v_hire_date DATE;
 BEGIN
-    -- Проверяем, существует ли работник с таким employee_id
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё СЂР°Р±РѕС‚РЅРёРє СЃ С‚Р°РєРёРј employee_id
     SELECT COUNT(*)
     INTO v_employee_exists
     FROM admin.Employee
@@ -444,7 +444,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20001, 'Employee with the specified employee_id does not exist.');
     END IF;
 
-    -- Проверяем, существует ли связь с таблицей Users
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё СЃРІСЏР·СЊ СЃ С‚Р°Р±Р»РёС†РµР№ Users
     SELECT COUNT(*)
     INTO v_user_link_exists
     FROM admin.Employee e
@@ -455,7 +455,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20004, 'No corresponding user found for the specified employee_id.');
     END IF;
 
-    -- Проверяем, существует ли аэропорт с таким airport_id
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё Р°СЌСЂРѕРїРѕСЂС‚ СЃ С‚Р°РєРёРј airport_id
     SELECT COUNT(*)
     INTO v_airport_exists
     FROM admin.Airports
@@ -465,9 +465,9 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20002, 'Airport with the specified airport_id does not exist.');
     END IF;
 
-        -- Преобразуем дату из строки в тип DATE, если она передана
+        -- РџСЂРµРѕР±СЂР°Р·СѓРµРј РґР°С‚Сѓ РёР· СЃС‚СЂРѕРєРё РІ С‚РёРї DATE, РµСЃР»Рё РѕРЅР° РїРµСЂРµРґР°РЅР°
     IF p_hire_date IS NOT NULL THEN
-        -- Проверка на формат даты
+        -- РџСЂРѕРІРµСЂРєР° РЅР° С„РѕСЂРјР°С‚ РґР°С‚С‹
         BEGIN
             v_hire_date := TO_DATE(p_hire_date, 'YYYY-MM-DD');
         EXCEPTION
@@ -475,14 +475,14 @@ BEGIN
                 RAISE_APPLICATION_ERROR(-20003, 'Invalid date format. Use YYYY-MM-DD.');
         END;
     
-        -- Проверка, чтобы дата не была больше текущей даты
+        -- РџСЂРѕРІРµСЂРєР°, С‡С‚РѕР±С‹ РґР°С‚Р° РЅРµ Р±С‹Р»Р° Р±РѕР»СЊС€Рµ С‚РµРєСѓС‰РµР№ РґР°С‚С‹
         IF v_hire_date > SYSDATE THEN
             RAISE_APPLICATION_ERROR(-20004, 'Hire date cannot be greater than the current date.');
         END IF;
     END IF;
 
 
-    -- Выводим старые значения сотрудника
+    -- Р’С‹РІРѕРґРёРј СЃС‚Р°СЂС‹Рµ Р·РЅР°С‡РµРЅРёСЏ СЃРѕС‚СЂСѓРґРЅРёРєР°
     DBMS_OUTPUT.PUT_LINE('Existing employee details:');
     FOR old_emp IN (
         SELECT e.employee_id, e.airport_id, e.job_title, e.hire_date, e.salary, 
@@ -503,18 +503,18 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('---------------------------------');
     END LOOP;
 
-    -- Выполняем обновление данных сотрудника
+    -- Р’С‹РїРѕР»РЅСЏРµРј РѕР±РЅРѕРІР»РµРЅРёРµ РґР°РЅРЅС‹С… СЃРѕС‚СЂСѓРґРЅРёРєР°
     UPDATE admin.Employee
     SET 
-        airport_id = p_airport_id, -- Всегда обновляется
-        job_title = NVL(p_job_title, job_title), -- Оставляем старое значение, если p_job_title = NULL
-        hire_date = NVL(v_hire_date, hire_date), -- Оставляем старое значение, если p_hire_date = NULL
-        salary = NVL(p_salary, salary) -- Оставляем старое значение, если p_salary = NULL
+        airport_id = p_airport_id, -- Р’СЃРµРіРґР° РѕР±РЅРѕРІР»СЏРµС‚СЃСЏ
+        job_title = NVL(p_job_title, job_title), -- РћСЃС‚Р°РІР»СЏРµРј СЃС‚Р°СЂРѕРµ Р·РЅР°С‡РµРЅРёРµ, РµСЃР»Рё p_job_title = NULL
+        hire_date = NVL(v_hire_date, hire_date), -- РћСЃС‚Р°РІР»СЏРµРј СЃС‚Р°СЂРѕРµ Р·РЅР°С‡РµРЅРёРµ, РµСЃР»Рё p_hire_date = NULL
+        salary = NVL(p_salary, salary) -- РћСЃС‚Р°РІР»СЏРµРј СЃС‚Р°СЂРѕРµ Р·РЅР°С‡РµРЅРёРµ, РµСЃР»Рё p_salary = NULL
     WHERE employee_id = p_employee_id;
 
     COMMIT;
 
-    -- Выводим обновленные значения сотрудника
+    -- Р’С‹РІРѕРґРёРј РѕР±РЅРѕРІР»РµРЅРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ СЃРѕС‚СЂСѓРґРЅРёРєР°
     DBMS_OUTPUT.PUT_LINE('Updated employee details:');
     FOR new_emp IN (
         SELECT e.employee_id, e.airport_id, e.job_title, e.hire_date, e.salary, 
@@ -548,16 +548,16 @@ END;
 
 
 CREATE OR REPLACE PROCEDURE sp_delete_employee (
-    p_employee_id IN NUMBER -- ID сотрудника для удаления
+    p_employee_id IN NUMBER -- ID СЃРѕС‚СЂСѓРґРЅРёРєР° РґР»СЏ СѓРґР°Р»РµРЅРёСЏ
 )
 AUTHID DEFINER
 AS
-    v_employee_exists   NUMBER;  -- Флаг существования сотрудника
-    v_user_link_exists  NUMBER;  -- Флаг связи сотрудника с пользователем
-    v_user_id           NUMBER;  -- ID пользователя
-    v_ticket_link       NUMBER;  -- Флаг связи пользователя с билетами
+    v_employee_exists   NUMBER;  -- Р¤Р»Р°Рі СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ СЃРѕС‚СЂСѓРґРЅРёРєР°
+    v_user_link_exists  NUMBER;  -- Р¤Р»Р°Рі СЃРІСЏР·Рё СЃРѕС‚СЂСѓРґРЅРёРєР° СЃ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј
+    v_user_id           NUMBER;  -- ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+    v_ticket_link       NUMBER;  -- Р¤Р»Р°Рі СЃРІСЏР·Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ Р±РёР»РµС‚Р°РјРё
 BEGIN
-    -- Проверка существования сотрудника
+    -- РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ СЃРѕС‚СЂСѓРґРЅРёРєР°
     SELECT COUNT(*)
     INTO v_employee_exists
     FROM admin.Employee
@@ -567,7 +567,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20001, 'Employee with the specified employee_id does not exist.');
     END IF;
 
-    -- Получаем user_id сотрудника
+    -- РџРѕР»СѓС‡Р°РµРј user_id СЃРѕС‚СЂСѓРґРЅРёРєР°
     BEGIN
         SELECT e.user_id
         INTO v_user_id
@@ -578,7 +578,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20004, 'No corresponding user found for the specified employee_id.');
     END;
 
-    -- Проверка существования пользователя в таблице Users
+    -- РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІ С‚Р°Р±Р»РёС†Рµ Users
     SELECT COUNT(*)
     INTO v_user_link_exists
     FROM admin.Users u
@@ -588,7 +588,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20004, 'The user linked to this employee_id does not exist in Users.');
     END IF;
 
-    -- Проверка связи пользователя с билетами (Tickets)
+    -- РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ Р±РёР»РµС‚Р°РјРё (Tickets)
     SELECT COUNT(*)
     INTO v_ticket_link
     FROM admin.Tickets t
@@ -598,7 +598,7 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('User linked to employee has associated tickets.');
         DBMS_OUTPUT.PUT_LINE('Updating passenger_id to NULL and ticket status to ''Available'' in Tickets table...');
 
-        -- Обновление поля passenger_id на NULL и статуса билета на 'Available'
+        -- РћР±РЅРѕРІР»РµРЅРёРµ РїРѕР»СЏ passenger_id РЅР° NULL Рё СЃС‚Р°С‚СѓСЃР° Р±РёР»РµС‚Р° РЅР° 'Available'
         UPDATE admin.Tickets
         SET passenger_id = NULL,
             ticket_status = 'Available'
@@ -607,7 +607,7 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('Passenger ID in associated tickets has been set to NULL and ticket status updated to ''Available''.');
     END IF;
 
-    -- Вывод информации о сотруднике перед удалением
+    -- Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЃРѕС‚СЂСѓРґРЅРёРєРµ РїРµСЂРµРґ СѓРґР°Р»РµРЅРёРµРј
     DBMS_OUTPUT.PUT_LINE('Deleting employee details:');
     DBMS_OUTPUT.PUT_LINE('---------------------------------');
 
@@ -671,15 +671,15 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('---------------------------------');
     END LOOP;
 
-    -- Удаление сотрудника из таблицы Employee
+    -- РЈРґР°Р»РµРЅРёРµ СЃРѕС‚СЂСѓРґРЅРёРєР° РёР· С‚Р°Р±Р»РёС†С‹ Employee
     DELETE FROM admin.Employee
     WHERE employee_id = p_employee_id;
 
-    -- Удаление пользователя из таблицы Users
+    -- РЈРґР°Р»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР· С‚Р°Р±Р»РёС†С‹ Users
     DELETE FROM admin.Users
     WHERE user_id = v_user_id;
 
-    -- Подтверждение транзакции
+    -- РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ С‚СЂР°РЅР·Р°РєС†РёРё
     COMMIT;
 
     DBMS_OUTPUT.PUT_LINE('Employee with Employee ID ' || p_employee_id || ' and associated user have been successfully deleted.');
@@ -699,7 +699,7 @@ END;
 CREATE OR REPLACE PROCEDURE sp_get_all_employees_sorted_by_airport
 AUTHID DEFINER
 AS
-    v_count_records NUMBER := 0; -- Счётчик записей
+    v_count_records NUMBER := 0; -- РЎС‡С‘С‚С‡РёРє Р·Р°РїРёСЃРµР№
 BEGIN
     DBMS_OUTPUT.PUT_LINE('List of all employees sorted by Airport ID:');
     DBMS_OUTPUT.PUT_LINE('---------------------------------');
@@ -742,9 +742,9 @@ BEGIN
         JOIN admin.Airports a ON e.airport_id = a.airport_id
         ORDER BY a.airport_id ASC
     ) LOOP
-        v_count_records := v_count_records + 1; -- Увеличиваем счётчик записей
+        v_count_records := v_count_records + 1; -- РЈРІРµР»РёС‡РёРІР°РµРј СЃС‡С‘С‚С‡РёРє Р·Р°РїРёСЃРµР№
         
-        -- Вывод информации о сотруднике
+        -- Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЃРѕС‚СЂСѓРґРЅРёРєРµ
         DBMS_OUTPUT.PUT_LINE('Employee ID: ' || emp_info.employee_id);
         DBMS_OUTPUT.PUT_LINE('User ID: ' || emp_info.user_id);
         DBMS_OUTPUT.PUT_LINE('Username: ' || emp_info.username);
@@ -767,7 +767,7 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('---------------------------------');
     END LOOP;
 
-    -- Если записей не найдено
+    -- Р•СЃР»Рё Р·Р°РїРёСЃРµР№ РЅРµ РЅР°Р№РґРµРЅРѕ
     IF v_count_records = 0 THEN
         DBMS_OUTPUT.PUT_LINE('No employees found in the system.');
     END IF;
@@ -786,15 +786,15 @@ END;
 /
 
 CREATE OR REPLACE PROCEDURE sp_delete_user (
-    p_user_id IN NUMBER -- ID пользователя для удаления
+    p_user_id IN NUMBER -- ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ
 )
 AUTHID DEFINER
 AS
-    v_user_exists   NUMBER; -- Флаг существования пользователя
-    v_employee_link NUMBER; -- Флаг связи пользователя с таблицей Employee
-    v_ticket_link   NUMBER; -- Флаг связи пользователя с билетами
+    v_user_exists   NUMBER; -- Р¤Р»Р°Рі СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+    v_employee_link NUMBER; -- Р¤Р»Р°Рі СЃРІСЏР·Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ С‚Р°Р±Р»РёС†РµР№ Employee
+    v_ticket_link   NUMBER; -- Р¤Р»Р°Рі СЃРІСЏР·Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ Р±РёР»РµС‚Р°РјРё
 BEGIN
-    -- Проверка существования пользователя в таблице Users
+    -- РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІ С‚Р°Р±Р»РёС†Рµ Users
     SELECT COUNT(*)
     INTO v_user_exists
     FROM admin.Users
@@ -805,7 +805,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20001, 'User with the specified user_id does not exist.');
     END IF;
 
-    -- Проверка связи пользователя с таблицей Employee
+    -- РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ С‚Р°Р±Р»РёС†РµР№ Employee
     SELECT COUNT(*)
     INTO v_employee_link
     FROM admin.Employee e
@@ -818,7 +818,7 @@ BEGIN
             'The specified user is linked to an employee. Use the procedure sp_delete_employee to delete this user.');
     END IF;
 
-    -- Проверка связи пользователя с билетами (Tickets)
+    -- РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ Р±РёР»РµС‚Р°РјРё (Tickets)
     SELECT COUNT(*)
     INTO v_ticket_link
     FROM admin.Tickets t
@@ -827,7 +827,7 @@ BEGIN
     IF v_ticket_link > 0 THEN
         DBMS_OUTPUT.PUT_LINE('User has associated tickets. Updating passenger_id to NULL in Tickets table...');
 
-        -- Обновление поля passenger_id на NULL
+        -- РћР±РЅРѕРІР»РµРЅРёРµ РїРѕР»СЏ passenger_id РЅР° NULL
         UPDATE admin.Tickets
         SET passenger_id = NULL,
         ticket_status = 'Available'
@@ -836,7 +836,7 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('Passenger ID in associated tickets has been successfully set to NULL.');
     END IF;
 
-    -- Вывод информации о пользователе перед удалением
+    -- Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ РїРµСЂРµРґ СѓРґР°Р»РµРЅРёРµРј
     DBMS_OUTPUT.PUT_LINE('Deleting user details:');
     DBMS_OUTPUT.PUT_LINE('---------------------------------');
 
@@ -882,11 +882,11 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('---------------------------------');
     END LOOP;
 
-    -- Удаление пользователя из таблицы Users
+    -- РЈРґР°Р»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР· С‚Р°Р±Р»РёС†С‹ Users
     DELETE FROM admin.Users
     WHERE user_id = p_user_id;
 
-    -- Подтверждение транзакции
+    -- РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ С‚СЂР°РЅР·Р°РєС†РёРё
     COMMIT;
 
     DBMS_OUTPUT.PUT_LINE('User with User ID ' || p_user_id || ' has been successfully deleted.');
@@ -908,32 +908,32 @@ END;
 
 
 CREATE OR REPLACE PROCEDURE sp_add_user (
-    p_username        IN VARCHAR2,  -- Имя пользователя
-    p_user_password   IN VARCHAR2,  -- Пароль
+    p_username        IN VARCHAR2,  -- РРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+    p_user_password   IN VARCHAR2,  -- РџР°СЂРѕР»СЊ
     p_email           IN VARCHAR2,  -- Email
-    p_passport_number IN VARCHAR2,  -- Номер паспорта
-    p_phone           IN VARCHAR2 DEFAULT NULL, -- Телефон
-    p_firstname       IN VARCHAR2,  -- Имя
-    p_lastname        IN VARCHAR2,  -- Фамилия
-    p_birthdate       IN VARCHAR2,  -- Дата рождения (строка в формате 'YYYY-MM-DD')
-    p_country         IN VARCHAR2 DEFAULT NULL, -- Страна
-    p_city            IN VARCHAR2 DEFAULT NULL, -- Город
-    p_street          IN VARCHAR2 DEFAULT NULL -- Улица
+    p_passport_number IN VARCHAR2,  -- РќРѕРјРµСЂ РїР°СЃРїРѕСЂС‚Р°
+    p_phone           IN VARCHAR2 DEFAULT NULL, -- РўРµР»РµС„РѕРЅ
+    p_firstname       IN VARCHAR2,  -- РРјСЏ
+    p_lastname        IN VARCHAR2,  -- Р¤Р°РјРёР»РёСЏ
+    p_birthdate       IN VARCHAR2,  -- Р”Р°С‚Р° СЂРѕР¶РґРµРЅРёСЏ (СЃС‚СЂРѕРєР° РІ С„РѕСЂРјР°С‚Рµ 'YYYY-MM-DD')
+    p_country         IN VARCHAR2 DEFAULT NULL, -- РЎС‚СЂР°РЅР°
+    p_city            IN VARCHAR2 DEFAULT NULL, -- Р“РѕСЂРѕРґ
+    p_street          IN VARCHAR2 DEFAULT NULL -- РЈР»РёС†Р°
 )
 AUTHID DEFINER
 AS
-    v_user_id NUMBER; -- ID зарегистрированного пользователя
+    v_user_id NUMBER; -- ID Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     v_duplicate_count NUMBER;
     v_birth_date DATE;
 
-    -- Переменные для шифрования
+    -- РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ С€РёС„СЂРѕРІР°РЅРёСЏ
     encrypted_passport_number VARCHAR2(200);
     encrypted_firstname       VARCHAR2(100);
     encrypted_lastname        VARCHAR2(100);
     encrypted_city            VARCHAR2(50);
     encrypted_street          VARCHAR2(100);
 BEGIN
-    -- Преобразование строки даты рождения в формат DATE
+    -- РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ СЃС‚СЂРѕРєРё РґР°С‚С‹ СЂРѕР¶РґРµРЅРёСЏ РІ С„РѕСЂРјР°С‚ DATE
     BEGIN
         v_birth_date := TO_DATE(p_birthdate, 'YYYY-MM-DD');
     EXCEPTION
@@ -941,7 +941,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20001, 'Invalid date format for birthdate. Use "YYYY-MM-DD".');
     END;
 
-    -- Проверка на дубликаты по username, email или паспорту
+    -- РџСЂРѕРІРµСЂРєР° РЅР° РґСѓР±Р»РёРєР°С‚С‹ РїРѕ username, email РёР»Рё РїР°СЃРїРѕСЂС‚Сѓ
     BEGIN
         SELECT COUNT(*)
         INTO v_duplicate_count
@@ -959,12 +959,12 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20005, 'Error during duplicate check: ' || SQLERRM);
     END;
 
-    -- Шифрование обязательных полей
+    -- РЁРёС„СЂРѕРІР°РЅРёРµ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№
     encrypted_passport_number := admin.pkg_crypto_utils.encrypt_data(p_passport_number);
     encrypted_firstname := admin.pkg_crypto_utils.encrypt_data(p_firstname);
     encrypted_lastname := admin.pkg_crypto_utils.encrypt_data(p_lastname);
 
-    -- Шифрование необязательных полей
+    -- РЁРёС„СЂРѕРІР°РЅРёРµ РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№
     IF p_city IS NOT NULL THEN
         encrypted_city := admin.pkg_crypto_utils.encrypt_data(p_city);
     ELSE
@@ -977,7 +977,7 @@ BEGIN
         encrypted_street := NULL;
     END IF;
 
-    -- Добавление пользователя в таблицу Users
+    -- Р”РѕР±Р°РІР»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІ С‚Р°Р±Р»РёС†Сѓ Users
     INSERT INTO admin.Users (
         username, user_password, email, phone, firstname, lastname, birthdate,
         country, city, street, passport_number
@@ -997,10 +997,10 @@ BEGIN
     )
     RETURNING user_id INTO v_user_id;
 
-    -- Подтверждаем транзакцию
+    -- РџРѕРґС‚РІРµСЂР¶РґР°РµРј С‚СЂР°РЅР·Р°РєС†РёСЋ
     COMMIT;
 
-    -- Вывод информации о новом пользователе
+    -- Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ РЅРѕРІРѕРј РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ
     DBMS_OUTPUT.PUT_LINE('User successfully added:');
     DBMS_OUTPUT.PUT_LINE('---------------------------------');
     DBMS_OUTPUT.PUT_LINE('User ID: ' || v_user_id);

@@ -1,23 +1,23 @@
 DECLARE
-    v_counter NUMBER := 0; -- Счетчик для количества вставок
+    v_counter NUMBER := 0; -- РЎС‡РµС‚С‡РёРє РґР»СЏ РєРѕР»РёС‡РµСЃС‚РІР° РІСЃС‚Р°РІРѕРє
 BEGIN
-    -- Используем APPEND для ускорения вставки
+    -- РСЃРїРѕР»СЊР·СѓРµРј APPEND РґР»СЏ СѓСЃРєРѕСЂРµРЅРёСЏ РІСЃС‚Р°РІРєРё
     FOR i IN 1..100000 LOOP
-        -- Пакетная вставка (используется BULK COLLECT и FORALL)
+        -- РџР°РєРµС‚РЅР°СЏ РІСЃС‚Р°РІРєР° (РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ BULK COLLECT Рё FORALL)
         INSERT /*+ APPEND */ INTO Airplane_Types (
             airplane_model, 
             manufacturer, 
             seating_capacity, 
             airplane_description
         ) VALUES (
-            'Model_' || TO_CHAR(i), -- Динамическое имя модели (например: Model_1, Model_2, ...)
-            'Manufacturer_' || TO_CHAR(MOD(i, 50) + 1), -- 50 уникальных производителей
-            MOD(i, 300) + 100, -- Вместимость от 100 до 400 мест
-            'Description for airplane model ' || TO_CHAR(i) -- Описание
+            'Model_' || TO_CHAR(i), -- Р”РёРЅР°РјРёС‡РµСЃРєРѕРµ РёРјСЏ РјРѕРґРµР»Рё (РЅР°РїСЂРёРјРµСЂ: Model_1, Model_2, ...)
+            'Manufacturer_' || TO_CHAR(MOD(i, 50) + 1), -- 50 СѓРЅРёРєР°Р»СЊРЅС‹С… РїСЂРѕРёР·РІРѕРґРёС‚РµР»РµР№
+            MOD(i, 300) + 100, -- Р’РјРµСЃС‚РёРјРѕСЃС‚СЊ РѕС‚ 100 РґРѕ 400 РјРµСЃС‚
+            'Description for airplane model ' || TO_CHAR(i) -- РћРїРёСЃР°РЅРёРµ
         );
     END LOOP;
 
-    -- Заключительный коммит
+    -- Р—Р°РєР»СЋС‡РёС‚РµР»СЊРЅС‹Р№ РєРѕРјРјРёС‚
     COMMIT;
     DBMS_OUTPUT.PUT_LINE('100,000 rows successfully inserted into Airplane_Types table.');
 EXCEPTION
@@ -33,12 +33,12 @@ DECLARE
     TYPE t_seating_capacity IS TABLE OF NUMBER;
     TYPE t_airplane_description IS TABLE OF VARCHAR2(400);
 
-    v_airplane_model t_airplane_model := t_airplane_model(); -- Инициализация коллекций
+    v_airplane_model t_airplane_model := t_airplane_model(); -- РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕР»Р»РµРєС†РёР№
     v_manufacturer t_manufacturer := t_manufacturer();
     v_seating_capacity t_seating_capacity := t_seating_capacity();
     v_airplane_description t_airplane_description := t_airplane_description();
 BEGIN
-    -- Заполнение коллекций данными
+    -- Р—Р°РїРѕР»РЅРµРЅРёРµ РєРѕР»Р»РµРєС†РёР№ РґР°РЅРЅС‹РјРё
     FOR i IN 1..100000 LOOP
         v_airplane_model.EXTEND;
         v_manufacturer.EXTEND;
@@ -51,7 +51,7 @@ BEGIN
         v_airplane_description(v_airplane_description.COUNT) := 'Description for airplane model ' || TO_CHAR(i);
     END LOOP;
 
-    -- Пакетная вставка
+    -- РџР°РєРµС‚РЅР°СЏ РІСЃС‚Р°РІРєР°
     FORALL i IN 1..v_airplane_model.COUNT
         INSERT INTO Airplane_Types (
             airplane_model, 

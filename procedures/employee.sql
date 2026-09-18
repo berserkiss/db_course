@@ -303,7 +303,7 @@ IS
         SELECT uv.*
         FROM admin.Users_View uv
         WHERE uv.user_id NOT IN (SELECT user_id FROM Employee)
-        ORDER BY uv.user_id; -- Сортируем пользователей по user_id (или любому другому полю)
+        ORDER BY uv.user_id; -- РЎРѕСЂС‚РёСЂСѓРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РїРѕ user_id (РёР»Рё Р»СЋР±РѕРјСѓ РґСЂСѓРіРѕРјСѓ РїРѕР»СЋ)
 
     CURSOR tickets_cur (p_user_id NUMBER) IS
         SELECT t.ticket_number, 
@@ -323,19 +323,19 @@ IS
           AND t.ticket_status = 'Booked'
           AND f.departure_time > SYSDATE
           AND (f.departure_airport_id = p_airport_id OR f.arrival_airport_id = p_airport_id)
-        ORDER BY f.departure_time; -- Сортируем билеты по времени вылета
+        ORDER BY f.departure_time; -- РЎРѕСЂС‚РёСЂСѓРµРј Р±РёР»РµС‚С‹ РїРѕ РІСЂРµРјРµРЅРё РІС‹Р»РµС‚Р°
 
     v_user regular_users_cur%ROWTYPE;
     v_ticket tickets_cur%ROWTYPE;
-    v_ticket_exists BOOLEAN := FALSE; -- Флаг для проверки наличия билетов
+    v_ticket_exists BOOLEAN := FALSE; -- Р¤Р»Р°Рі РґР»СЏ РїСЂРѕРІРµСЂРєРё РЅР°Р»РёС‡РёСЏ Р±РёР»РµС‚РѕРІ
 BEGIN
-    -- Обходим всех обычных пользователей
+    -- РћР±С…РѕРґРёРј РІСЃРµС… РѕР±С‹С‡РЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
     OPEN regular_users_cur;
     LOOP
         FETCH regular_users_cur INTO v_user;
         EXIT WHEN regular_users_cur%NOTFOUND;
 
-        -- Выводим информацию о пользователе
+        -- Р’С‹РІРѕРґРёРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ
         DBMS_OUTPUT.PUT_LINE('=================================================');
         DBMS_OUTPUT.PUT_LINE('User ID: ' || v_user.user_id);
         DBMS_OUTPUT.PUT_LINE('Username: ' || v_user.username);
@@ -350,14 +350,14 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('Passport Number: ' || v_user.passport_number);
         DBMS_OUTPUT.PUT_LINE('Active: ' || CASE v_user.is_active WHEN 1 THEN 'Yes' ELSE 'No' END);
         
-        -- Проверяем наличие забронированных билетов
+        -- РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ Р·Р°Р±СЂРѕРЅРёСЂРѕРІР°РЅРЅС‹С… Р±РёР»РµС‚РѕРІ
         OPEN tickets_cur(v_user.user_id);
         LOOP
             FETCH tickets_cur INTO v_ticket;
             EXIT WHEN tickets_cur%NOTFOUND;
 
-            -- Выводим информацию о билете и рейсе
-            v_ticket_exists := TRUE; -- Билеты найдены, устанавливаем флаг
+            -- Р’С‹РІРѕРґРёРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р±РёР»РµС‚Рµ Рё СЂРµР№СЃРµ
+            v_ticket_exists := TRUE; -- Р‘РёР»РµС‚С‹ РЅР°Р№РґРµРЅС‹, СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„Р»Р°Рі
             DBMS_OUTPUT.PUT_LINE('  ---------------------------------------------');
             DBMS_OUTPUT.PUT_LINE('  Ticket Number: ' || v_ticket.ticket_number);
             DBMS_OUTPUT.PUT_LINE('  Seat Number: ' || v_ticket.seat_number);
@@ -371,7 +371,7 @@ BEGIN
         END LOOP;
 
         IF NOT v_ticket_exists THEN
-            -- Если билетов нет, выводим сообщение
+            -- Р•СЃР»Рё Р±РёР»РµС‚РѕРІ РЅРµС‚, РІС‹РІРѕРґРёРј СЃРѕРѕР±С‰РµРЅРёРµ
             DBMS_OUTPUT.PUT_LINE('  No booked tickets for this user.');
         END IF;
 
@@ -394,14 +394,14 @@ CREATE OR REPLACE PROCEDURE SP_ADD_TICKET_FOR_AIRPORT_FLIGHT (
 AUTHID DEFINER
 IS
     v_flight_id         NUMBER;
-    v_seating_capacity  NUMBER; -- Вместимость самолета
-    v_ticket_count      NUMBER; -- Количество билетов на рейс
-    v_airplane_id       NUMBER; -- ID самолета
+    v_seating_capacity  NUMBER; -- Р’РјРµСЃС‚РёРјРѕСЃС‚СЊ СЃР°РјРѕР»РµС‚Р°
+    v_ticket_count      NUMBER; -- РљРѕР»РёС‡РµСЃС‚РІРѕ Р±РёР»РµС‚РѕРІ РЅР° СЂРµР№СЃ
+    v_airplane_id       NUMBER; -- ID СЃР°РјРѕР»РµС‚Р°
     v_airport_name      VARCHAR2(100);
     v_flight_number     VARCHAR2(20);
     v_departure_time    TIMESTAMP;
 BEGIN
-    -- Проверяем существует ли указанный аэропорт
+    -- РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё СѓРєР°Р·Р°РЅРЅС‹Р№ Р°СЌСЂРѕРїРѕСЂС‚
     BEGIN
         SELECT airport_name
         INTO v_airport_name
@@ -413,7 +413,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20001, 'Airport does not exist.');
     END;
 
-    -- Проверяем существует ли рейс с данным p_flight_id и связан ли он с указанным аэропортом
+    -- РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё СЂРµР№СЃ СЃ РґР°РЅРЅС‹Рј p_flight_id Рё СЃРІСЏР·Р°РЅ Р»Рё РѕРЅ СЃ СѓРєР°Р·Р°РЅРЅС‹Рј Р°СЌСЂРѕРїРѕСЂС‚РѕРј
     BEGIN
         SELECT flight_number, departure_time, airplane_id
         INTO v_flight_number, v_departure_time, v_airplane_id
@@ -426,13 +426,13 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20002, 'Flight does not exist for the given airport.');
     END;
 
-    -- Проверяем, что время отправки рейса больше текущего времени
+    -- РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё СЂРµР№СЃР° Р±РѕР»СЊС€Рµ С‚РµРєСѓС‰РµРіРѕ РІСЂРµРјРµРЅРё
     IF v_departure_time <= SYSTIMESTAMP THEN
         DBMS_OUTPUT.PUT_LINE('Error: Flight departure time must be in the future.');
         RAISE_APPLICATION_ERROR(-20003, 'Flight departure time must be in the future.');
     END IF;
 
-    -- Получаем вместимость самолета
+    -- РџРѕР»СѓС‡Р°РµРј РІРјРµСЃС‚РёРјРѕСЃС‚СЊ СЃР°РјРѕР»РµС‚Р°
     BEGIN
         SELECT at.seating_capacity
         INTO v_seating_capacity
@@ -445,32 +445,32 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20007, 'Airplane not found for the flight.');
     END;
 
-    -- Подсчитываем количество билетов на рейс
+    -- РџРѕРґСЃС‡РёС‚С‹РІР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ Р±РёР»РµС‚РѕРІ РЅР° СЂРµР№СЃ
     SELECT COUNT(*)
     INTO v_ticket_count
     FROM Tickets
     WHERE flight_id = p_flight_id;
 
-    -- Проверяем, не превышает ли количество билетов вместимость самолета
+    -- РџСЂРѕРІРµСЂСЏРµРј, РЅРµ РїСЂРµРІС‹С€Р°РµС‚ Р»Рё РєРѕР»РёС‡РµСЃС‚РІРѕ Р±РёР»РµС‚РѕРІ РІРјРµСЃС‚РёРјРѕСЃС‚СЊ СЃР°РјРѕР»РµС‚Р°
     IF v_ticket_count >= v_seating_capacity THEN
         DBMS_OUTPUT.PUT_LINE('Error: Seating capacity exceeded for flight ' || v_flight_number || '.');
         RAISE_APPLICATION_ERROR(-20008, 'Seating capacity exceeded.');
     END IF;
 
-    -- Проверяем, что класс билета допустим
+    -- РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РєР»Р°СЃСЃ Р±РёР»РµС‚Р° РґРѕРїСѓСЃС‚РёРј
     IF p_ticket_class NOT IN ('Economy', 'Business', 'First') THEN
         DBMS_OUTPUT.PUT_LINE('Error: Invalid ticket class ' || p_ticket_class || '.');
         RAISE_APPLICATION_ERROR(-20004, 'Invalid ticket class.');
     END IF;
 
-    -- Выводим информацию о билете, который будет добавлен
+    -- Р’С‹РІРѕРґРёРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р±РёР»РµС‚Рµ, РєРѕС‚РѕСЂС‹Р№ Р±СѓРґРµС‚ РґРѕР±Р°РІР»РµРЅ
     DBMS_OUTPUT.PUT_LINE('Adding ticket for airport: ' || v_airport_name);
     DBMS_OUTPUT.PUT_LINE('Flight number: ' || v_flight_number);
     DBMS_OUTPUT.PUT_LINE('Seat number: ' || p_seat_number);
     DBMS_OUTPUT.PUT_LINE('Ticket class: ' || p_ticket_class);
     DBMS_OUTPUT.PUT_LINE('Ticket price: ' || p_price);
 
-    -- Добавляем билет в таблицу Tickets
+    -- Р”РѕР±Р°РІР»СЏРµРј Р±РёР»РµС‚ РІ С‚Р°Р±Р»РёС†Сѓ Tickets
     BEGIN
         INSERT INTO admin.Tickets (
             ticket_number, 
@@ -481,9 +481,9 @@ BEGIN
             ticket_class, 
             ticket_status
         ) VALUES (
-            NULL,  -- ticket_number будет сгенерирован триггером
+            NULL,  -- ticket_number Р±СѓРґРµС‚ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ С‚СЂРёРіРіРµСЂРѕРј
             p_flight_id,
-            NULL,  -- Не передаем passenger_id, так как он может быть установлен позже
+            NULL,  -- РќРµ РїРµСЂРµРґР°РµРј passenger_id, С‚Р°Рє РєР°Рє РѕРЅ РјРѕР¶РµС‚ Р±С‹С‚СЊ СѓСЃС‚Р°РЅРѕРІР»РµРЅ РїРѕР·Р¶Рµ
             p_seat_number,
             p_price,
             p_ticket_class,
@@ -494,22 +494,22 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('Ticket added successfully for flight ' || v_flight_number || ' with seat ' || p_seat_number);
     EXCEPTION
         WHEN DUP_VAL_ON_INDEX THEN
-            -- Обрабатываем ошибку уникальности и выводим в DBMS_OUTPUT
+            -- РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РѕС€РёР±РєСѓ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚Рё Рё РІС‹РІРѕРґРёРј РІ DBMS_OUTPUT
             DBMS_OUTPUT.PUT_LINE('Error: A ticket with the same seat number already exists for this flight.');
-            ROLLBACK;  -- Откат транзакции в случае ошибки уникальности
+            ROLLBACK;  -- РћС‚РєР°С‚ С‚СЂР°РЅР·Р°РєС†РёРё РІ СЃР»СѓС‡Р°Рµ РѕС€РёР±РєРё СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚Рё
             RAISE_APPLICATION_ERROR(-20005, 'A ticket with the same seat number already exists for this flight.');
         WHEN OTHERS THEN
-            -- Обработка всех других ошибок
+            -- РћР±СЂР°Р±РѕС‚РєР° РІСЃРµС… РґСЂСѓРіРёС… РѕС€РёР±РѕРє
             DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
-            ROLLBACK;  -- Откат транзакции в случае других ошибок
+            ROLLBACK;  -- РћС‚РєР°С‚ С‚СЂР°РЅР·Р°РєС†РёРё РІ СЃР»СѓС‡Р°Рµ РґСЂСѓРіРёС… РѕС€РёР±РѕРє
             RAISE_APPLICATION_ERROR(-20006, 'Error in adding ticket: ' || SQLERRM);
     END;
 
 EXCEPTION
     WHEN OTHERS THEN
-        -- Общая обработка ошибок
+        -- РћР±С‰Р°СЏ РѕР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РѕРє
         DBMS_OUTPUT.PUT_LINE('Unexpected error: ' || SQLERRM);
-        ROLLBACK;  -- Откат транзакции при неожиданной ошибке
+        ROLLBACK;  -- РћС‚РєР°С‚ С‚СЂР°РЅР·Р°РєС†РёРё РїСЂРё РЅРµРѕР¶РёРґР°РЅРЅРѕР№ РѕС€РёР±РєРµ
         RAISE_APPLICATION_ERROR(-20000, 'Unexpected error: ' || SQLERRM);
 END;
 /
@@ -535,7 +535,7 @@ IS
         JOIN admin.Airports aa ON f.arrival_airport_id = aa.airport_id
         WHERE (f.departure_airport_id = p_airport_id 
                OR f.arrival_airport_id = p_airport_id)
-          AND f.departure_time > SYSDATE; -- Фильтрация по аэропорту и будущим рейсам
+          AND f.departure_time > SYSDATE; -- Р¤РёР»СЊС‚СЂР°С†РёСЏ РїРѕ Р°СЌСЂРѕРїРѕСЂС‚Сѓ Рё Р±СѓРґСѓС‰РёРј СЂРµР№СЃР°Рј
 
     CURSOR tickets_cur (p_flight_id NUMBER) IS
         SELECT t.ticket_number,
@@ -556,11 +556,11 @@ IS
 
     v_flight flights_cur%ROWTYPE;
     v_ticket tickets_cur%ROWTYPE;
-    v_ticket_exists BOOLEAN := FALSE; -- Флаг для проверки наличия билетов
+    v_ticket_exists BOOLEAN := FALSE; -- Р¤Р»Р°Рі РґР»СЏ РїСЂРѕРІРµСЂРєРё РЅР°Р»РёС‡РёСЏ Р±РёР»РµС‚РѕРІ
     v_airport_name VARCHAR2(100);
-    v_flights_found BOOLEAN := FALSE; -- Флаг для проверки наличия рейсов
+    v_flights_found BOOLEAN := FALSE; -- Р¤Р»Р°Рі РґР»СЏ РїСЂРѕРІРµСЂРєРё РЅР°Р»РёС‡РёСЏ СЂРµР№СЃРѕРІ
 BEGIN
-    -- Получаем имя аэропорта для вывода
+    -- РџРѕР»СѓС‡Р°РµРј РёРјСЏ Р°СЌСЂРѕРїРѕСЂС‚Р° РґР»СЏ РІС‹РІРѕРґР°
     BEGIN
         SELECT airport_name
         INTO v_airport_name
@@ -572,22 +572,22 @@ BEGIN
             RETURN;
     END;
 
-    -- Выводим информацию о аэропорте
+    -- Р’С‹РІРѕРґРёРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р°СЌСЂРѕРїРѕСЂС‚Рµ
     DBMS_OUTPUT.PUT_LINE('=================================================');
     DBMS_OUTPUT.PUT_LINE('Airport ID: ' || p_airport_id);
     DBMS_OUTPUT.PUT_LINE('Airport Name: ' || v_airport_name);
     DBMS_OUTPUT.PUT_LINE('=================================================');
 
-    -- Обрабатываем все рейсы, связанные с переданным аэропортом
+    -- РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РІСЃРµ СЂРµР№СЃС‹, СЃРІСЏР·Р°РЅРЅС‹Рµ СЃ РїРµСЂРµРґР°РЅРЅС‹Рј Р°СЌСЂРѕРїРѕСЂС‚РѕРј
     OPEN flights_cur;
     LOOP
         FETCH flights_cur INTO v_flight;
         EXIT WHEN flights_cur%NOTFOUND;
 
-        -- Если рейс найден, устанавливаем флаг в TRUE
+        -- Р•СЃР»Рё СЂРµР№СЃ РЅР°Р№РґРµРЅ, СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„Р»Р°Рі РІ TRUE
         v_flights_found := TRUE;
 
-        -- Выводим информацию о рейсе
+        -- Р’С‹РІРѕРґРёРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ СЂРµР№СЃРµ
         DBMS_OUTPUT.PUT_LINE('=================================================');
         DBMS_OUTPUT.PUT_LINE('Flight ID: ' || v_flight.flight_id);
         DBMS_OUTPUT.PUT_LINE('Flight Number: ' || v_flight.flight_number);
@@ -596,15 +596,15 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('Departure Airport: ' || v_flight.departure_airport);
         DBMS_OUTPUT.PUT_LINE('Arrival Airport: ' || v_flight.arrival_airport);
 
-        -- Проверяем наличие забронированных билетов для данного рейса
+        -- РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ Р·Р°Р±СЂРѕРЅРёСЂРѕРІР°РЅРЅС‹С… Р±РёР»РµС‚РѕРІ РґР»СЏ РґР°РЅРЅРѕРіРѕ СЂРµР№СЃР°
         OPEN tickets_cur(v_flight.flight_id);
-        v_ticket_exists := FALSE;  -- Сброс флага на начало
+        v_ticket_exists := FALSE;  -- РЎР±СЂРѕСЃ С„Р»Р°РіР° РЅР° РЅР°С‡Р°Р»Рѕ
         LOOP
             FETCH tickets_cur INTO v_ticket;
             EXIT WHEN tickets_cur%NOTFOUND;
 
-            -- Выводим информацию о билете
-            v_ticket_exists := TRUE; -- Билеты найдены, устанавливаем флаг
+            -- Р’С‹РІРѕРґРёРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р±РёР»РµС‚Рµ
+            v_ticket_exists := TRUE; -- Р‘РёР»РµС‚С‹ РЅР°Р№РґРµРЅС‹, СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„Р»Р°Рі
             DBMS_OUTPUT.PUT_LINE('  ---------------------------------------------');
             DBMS_OUTPUT.PUT_LINE('  Ticket Number: ' || v_ticket.ticket_number);
             DBMS_OUTPUT.PUT_LINE('  Seat Number: ' || v_ticket.seat_number);
@@ -616,7 +616,7 @@ BEGIN
             DBMS_OUTPUT.PUT_LINE('  Arrival Airport: ' || v_ticket.arrival_airport);
         END LOOP;
 
-        -- Если билетов нет, выводим соответствующее сообщение
+        -- Р•СЃР»Рё Р±РёР»РµС‚РѕРІ РЅРµС‚, РІС‹РІРѕРґРёРј СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРµ СЃРѕРѕР±С‰РµРЅРёРµ
         IF NOT v_ticket_exists THEN
             DBMS_OUTPUT.PUT_LINE('  No tickets for this flight.');
         END IF;
@@ -625,7 +625,7 @@ BEGIN
     END LOOP;
     CLOSE flights_cur;
 
-    -- Если рейсы не найдены, выводим сообщение
+    -- Р•СЃР»Рё СЂРµР№СЃС‹ РЅРµ РЅР°Р№РґРµРЅС‹, РІС‹РІРѕРґРёРј СЃРѕРѕР±С‰РµРЅРёРµ
     IF NOT v_flights_found THEN
         DBMS_OUTPUT.PUT_LINE('No flights found for this airport.');
     END IF;
@@ -641,7 +641,7 @@ CREATE OR REPLACE PROCEDURE SP_EDIT_TICKET (
     p_ticket_class      IN VARCHAR2 DEFAULT NULL,
     p_price             IN NUMBER DEFAULT NULL,
     p_flight_id         IN NUMBER,
-    p_airport_id        IN NUMBER  -- Параметр для аэропорта
+    p_airport_id        IN NUMBER  -- РџР°СЂР°РјРµС‚СЂ РґР»СЏ Р°СЌСЂРѕРїРѕСЂС‚Р°
 )
 AUTHID DEFINER
 IS
@@ -651,17 +651,17 @@ IS
     v_flight_number     VARCHAR2(20);
     v_exists_ticket     NUMBER := 0;
 
-    -- Переменные для данных билета до изменений
+    -- РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РґР°РЅРЅС‹С… Р±РёР»РµС‚Р° РґРѕ РёР·РјРµРЅРµРЅРёР№
     v_old_seat_number   VARCHAR2(10);
     v_old_ticket_class  VARCHAR2(20);
     v_old_price         NUMBER;
 
-    -- Переменные для данных билета после изменений
+    -- РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РґР°РЅРЅС‹С… Р±РёР»РµС‚Р° РїРѕСЃР»Рµ РёР·РјРµРЅРµРЅРёР№
     v_new_seat_number   VARCHAR2(10);
     v_new_ticket_class  VARCHAR2(20);
     v_new_price         NUMBER;
 BEGIN
-    -- Проверяем, существует ли билет с указанным ID, и выбираем текущие данные
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё Р±РёР»РµС‚ СЃ СѓРєР°Р·Р°РЅРЅС‹Рј ID, Рё РІС‹Р±РёСЂР°РµРј С‚РµРєСѓС‰РёРµ РґР°РЅРЅС‹Рµ
     BEGIN
         SELECT seat_number, ticket_class, price, flight_id
         INTO v_old_seat_number, v_old_ticket_class, v_old_price, v_flight_id
@@ -673,7 +673,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20001, 'Ticket does not exist.');
     END;
 
-    -- Получаем название аэропорта
+    -- РџРѕР»СѓС‡Р°РµРј РЅР°Р·РІР°РЅРёРµ Р°СЌСЂРѕРїРѕСЂС‚Р°
     BEGIN
         SELECT airport_name
         INTO v_airport_name
@@ -684,7 +684,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20008, 'Airport does not exist.');
     END;
 
-    -- Проверяем, существует ли рейс с данным p_flight_id и связан ли он с указанным аэропортом
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё СЂРµР№СЃ СЃ РґР°РЅРЅС‹Рј p_flight_id Рё СЃРІСЏР·Р°РЅ Р»Рё РѕРЅ СЃ СѓРєР°Р·Р°РЅРЅС‹Рј Р°СЌСЂРѕРїРѕСЂС‚РѕРј
     BEGIN
         SELECT flight_number, departure_time
         INTO v_flight_number, v_departure_time
@@ -696,17 +696,17 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20002, 'Flight does not exist for the given airport.');
     END;
 
-    -- Проверяем, что время отправки рейса больше текущего времени
+    -- РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё СЂРµР№СЃР° Р±РѕР»СЊС€Рµ С‚РµРєСѓС‰РµРіРѕ РІСЂРµРјРµРЅРё
     IF v_departure_time <= SYSTIMESTAMP THEN
         RAISE_APPLICATION_ERROR(-20003, 'Flight departure time must be in the future.');
     END IF;
 
-    -- Проверяем, что класс билета допустим, если он передан
+    -- РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РєР»Р°СЃСЃ Р±РёР»РµС‚Р° РґРѕРїСѓСЃС‚РёРј, РµСЃР»Рё РѕРЅ РїРµСЂРµРґР°РЅ
     IF p_ticket_class IS NOT NULL AND p_ticket_class NOT IN ('Economy', 'Business', 'First') THEN
         RAISE_APPLICATION_ERROR(-20004, 'Invalid ticket class.');
     END IF;
 
-    -- Проверяем, что новый номер места уникален для указанного рейса, если он передан
+    -- РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РЅРѕРІС‹Р№ РЅРѕРјРµСЂ РјРµСЃС‚Р° СѓРЅРёРєР°Р»РµРЅ РґР»СЏ СѓРєР°Р·Р°РЅРЅРѕРіРѕ СЂРµР№СЃР°, РµСЃР»Рё РѕРЅ РїРµСЂРµРґР°РЅ
     IF p_seat_number IS NOT NULL THEN
         SELECT COUNT(*)
         INTO v_exists_ticket
@@ -714,14 +714,14 @@ BEGIN
         WHERE flight_id = p_flight_id
           AND seat_number = p_seat_number
           AND ticket_status != 'Cancelled'
-          AND ticket_id != p_ticket_id; -- Исключаем текущий билет
+          AND ticket_id != p_ticket_id; -- РСЃРєР»СЋС‡Р°РµРј С‚РµРєСѓС‰РёР№ Р±РёР»РµС‚
 
         IF v_exists_ticket > 0 THEN
             RAISE_APPLICATION_ERROR(-20005, 'A ticket with the same seat number already exists for this flight.');
         END IF;
     END IF;
 
-    -- Вывод данных билета до изменений
+    -- Р’С‹РІРѕРґ РґР°РЅРЅС‹С… Р±РёР»РµС‚Р° РґРѕ РёР·РјРµРЅРµРЅРёР№
     DBMS_OUTPUT.PUT_LINE('--- Ticket Information Before Update ---');
     DBMS_OUTPUT.PUT_LINE('Ticket ID: ' || p_ticket_id);
     DBMS_OUTPUT.PUT_LINE('Flight Number: ' || v_flight_number);
@@ -729,7 +729,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Ticket Class: ' || v_old_ticket_class);
     DBMS_OUTPUT.PUT_LINE('Price: ' || v_old_price);
 
-    -- Обновляем информацию о билете
+    -- РћР±РЅРѕРІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р±РёР»РµС‚Рµ
     BEGIN
         UPDATE admin.Tickets
         SET seat_number   = NVL(p_seat_number, seat_number),
@@ -737,10 +737,10 @@ BEGIN
             price         = NVL(p_price, price)
         WHERE ticket_id = p_ticket_id;
 
-        -- Коммит обновления
+        -- РљРѕРјРјРёС‚ РѕР±РЅРѕРІР»РµРЅРёСЏ
         COMMIT;
 
-        -- Присваиваем новые данные для отображения после обновления
+        -- РџСЂРёСЃРІР°РёРІР°РµРј РЅРѕРІС‹Рµ РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РїРѕСЃР»Рµ РѕР±РЅРѕРІР»РµРЅРёСЏ
         v_new_seat_number := NVL(p_seat_number, v_old_seat_number);
         v_new_ticket_class := NVL(p_ticket_class, v_old_ticket_class);
         v_new_price := NVL(p_price, v_old_price);
@@ -750,7 +750,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20007, 'Error in updating ticket: ' || SQLERRM);
     END;
 
-    -- Вывод данных билета после изменений
+    -- Р’С‹РІРѕРґ РґР°РЅРЅС‹С… Р±РёР»РµС‚Р° РїРѕСЃР»Рµ РёР·РјРµРЅРµРЅРёР№
     DBMS_OUTPUT.PUT_LINE('--- Ticket Information After Update ---');
     DBMS_OUTPUT.PUT_LINE('Ticket ID: ' || p_ticket_id);
     DBMS_OUTPUT.PUT_LINE('Flight Number: ' || v_flight_number);
@@ -778,20 +778,20 @@ CREATE OR REPLACE PROCEDURE SP_DELETE_TICKET (
 )
 AUTHID DEFINER
 IS
-    v_airport_name      VARCHAR2(100);  -- Название аэропорта
+    v_airport_name      VARCHAR2(100);  -- РќР°Р·РІР°РЅРёРµ Р°СЌСЂРѕРїРѕСЂС‚Р°
     v_departure_airport NUMBER;
     v_arrival_airport   NUMBER;
-    v_ticket_info       Tickets%ROWTYPE; -- Полная информация о билете
-    v_flight_number     VARCHAR2(50);    -- Номер рейса
+    v_ticket_info       Tickets%ROWTYPE; -- РџРѕР»РЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ Рѕ Р±РёР»РµС‚Рµ
+    v_flight_number     VARCHAR2(50);    -- РќРѕРјРµСЂ СЂРµР№СЃР°
 BEGIN
-    -- Проверяем, существует ли аэропорт
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё Р°СЌСЂРѕРїРѕСЂС‚
     BEGIN
         SELECT airport_name
         INTO v_airport_name
         FROM admin.Airports
         WHERE airport_id = p_airport_id;
 
-        -- Выводим ID и название аэропорта
+        -- Р’С‹РІРѕРґРёРј ID Рё РЅР°Р·РІР°РЅРёРµ Р°СЌСЂРѕРїРѕСЂС‚Р°
         DBMS_OUTPUT.PUT_LINE('Airport ID: ' || p_airport_id);
         DBMS_OUTPUT.PUT_LINE('Airport Name: ' || v_airport_name);
     EXCEPTION
@@ -800,7 +800,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20001, 'Airport does not exist.');
     END;
 
-    -- Проверяем, существует ли рейс и связан ли он с указанным аэропортом
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё СЂРµР№СЃ Рё СЃРІСЏР·Р°РЅ Р»Рё РѕРЅ СЃ СѓРєР°Р·Р°РЅРЅС‹Рј Р°СЌСЂРѕРїРѕСЂС‚РѕРј
     BEGIN
         SELECT departure_airport_id, arrival_airport_id, flight_number
         INTO v_departure_airport, v_arrival_airport, v_flight_number
@@ -812,7 +812,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20002, 'Flight is not associated with the specified airport.');
         END IF;
 
-        -- Выводим ID и номер рейса
+        -- Р’С‹РІРѕРґРёРј ID Рё РЅРѕРјРµСЂ СЂРµР№СЃР°
         DBMS_OUTPUT.PUT_LINE('Flight ID: ' || p_flight_id);
         DBMS_OUTPUT.PUT_LINE('Flight Number: ' || v_flight_number);
     EXCEPTION
@@ -821,14 +821,14 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20003, 'Flight does not exist.');
     END;
 
-    -- Проверяем, существует ли билет и связан ли он с указанным рейсом
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё Р±РёР»РµС‚ Рё СЃРІСЏР·Р°РЅ Р»Рё РѕРЅ СЃ СѓРєР°Р·Р°РЅРЅС‹Рј СЂРµР№СЃРѕРј
     BEGIN
         SELECT *
         INTO v_ticket_info
         FROM admin.Tickets
         WHERE ticket_id = p_ticket_id AND flight_id = p_flight_id;
 
-        -- Выводим ID и номер билета
+        -- Р’С‹РІРѕРґРёРј ID Рё РЅРѕРјРµСЂ Р±РёР»РµС‚Р°
         DBMS_OUTPUT.PUT_LINE('Ticket ID: ' || p_ticket_id);
         DBMS_OUTPUT.PUT_LINE('Ticket Number: ' || v_ticket_info.ticket_number);
     EXCEPTION
@@ -837,7 +837,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20004, 'Ticket does not exist for the specified flight.');
     END;
 
-    -- Удаляем билет
+    -- РЈРґР°Р»СЏРµРј Р±РёР»РµС‚
     BEGIN
         DELETE FROM admin.Tickets
         WHERE ticket_id = p_ticket_id;
@@ -875,20 +875,20 @@ END;
 
 
 CREATE OR REPLACE PROCEDURE sp_delete_flight (
-    p_flight_id   IN NUMBER,  -- ID рейса, который нужно удалить
-    p_airport_id  IN NUMBER   -- ID аэропорта, с которым должен быть связан рейс
+    p_flight_id   IN NUMBER,  -- ID СЂРµР№СЃР°, РєРѕС‚РѕСЂС‹Р№ РЅСѓР¶РЅРѕ СѓРґР°Р»РёС‚СЊ
+    p_airport_id  IN NUMBER   -- ID Р°СЌСЂРѕРїРѕСЂС‚Р°, СЃ РєРѕС‚РѕСЂС‹Рј РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЃРІСЏР·Р°РЅ СЂРµР№СЃ
 )
 AUTHID DEFINER
 IS
-    v_airport_count NUMBER;       -- Проверка существования аэропорта
-    v_airport_name  VARCHAR2(100); -- Название аэропорта
+    v_airport_count NUMBER;       -- РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ Р°СЌСЂРѕРїРѕСЂС‚Р°
+    v_airport_name  VARCHAR2(100); -- РќР°Р·РІР°РЅРёРµ Р°СЌСЂРѕРїРѕСЂС‚Р°
     v_departure_airport_id NUMBER;
     v_arrival_airport_id   NUMBER;
     v_flight_number VARCHAR2(20);
     v_ticket_info Tickets%ROWTYPE;
     v_passenger_id_display VARCHAR2(20);
 BEGIN
-    -- Проверяем существование аэропорта
+    -- РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ Р°СЌСЂРѕРїРѕСЂС‚Р°
     SELECT COUNT(*)
     INTO v_airport_count
     FROM admin.Airports
@@ -899,13 +899,13 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20001, 'Airport does not exist.');
     END IF;
 
-    -- Получаем название аэропорта
+    -- РџРѕР»СѓС‡Р°РµРј РЅР°Р·РІР°РЅРёРµ Р°СЌСЂРѕРїРѕСЂС‚Р°
     SELECT airport_name
     INTO v_airport_name
     FROM admin.Airports
     WHERE airport_id = p_airport_id;
 
-    -- Проверяем, связан ли рейс с указанным аэропортом
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃРІСЏР·Р°РЅ Р»Рё СЂРµР№СЃ СЃ СѓРєР°Р·Р°РЅРЅС‹Рј Р°СЌСЂРѕРїРѕСЂС‚РѕРј
     BEGIN
         SELECT departure_airport_id, arrival_airport_id, flight_number
         INTO v_departure_airport_id, v_arrival_airport_id, v_flight_number
@@ -922,25 +922,25 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20003, 'Flight does not exist.');
     END;
 
-    -- Выводим информацию об аэропорте и рейсе
+    -- Р’С‹РІРѕРґРёРј РёРЅС„РѕСЂРјР°С†РёСЋ РѕР± Р°СЌСЂРѕРїРѕСЂС‚Рµ Рё СЂРµР№СЃРµ
     DBMS_OUTPUT.PUT_LINE('Airport Name: ' || v_airport_name || ', Airport ID: ' || p_airport_id);
     DBMS_OUTPUT.PUT_LINE('Flight Number: ' || v_flight_number || ', Flight ID: ' || p_flight_id);
 
-    -- Проверяем и удаляем связанные билеты
+    -- РџСЂРѕРІРµСЂСЏРµРј Рё СѓРґР°Р»СЏРµРј СЃРІСЏР·Р°РЅРЅС‹Рµ Р±РёР»РµС‚С‹
     FOR v_ticket_info IN (
         SELECT *
         FROM admin.Tickets
         WHERE flight_id = p_flight_id
-        ORDER BY ticket_number -- Сортировка билетов по номеру
+        ORDER BY ticket_number -- РЎРѕСЂС‚РёСЂРѕРІРєР° Р±РёР»РµС‚РѕРІ РїРѕ РЅРѕРјРµСЂСѓ
     ) LOOP
-        -- Проверяем passenger_id на NULL
+        -- РџСЂРѕРІРµСЂСЏРµРј passenger_id РЅР° NULL
         IF v_ticket_info.passenger_id IS NULL THEN
             v_passenger_id_display := 'N/A';
         ELSE
             v_passenger_id_display := TO_CHAR(v_ticket_info.passenger_id);
         END IF;
 
-        -- Вывод информации о билете
+        -- Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ Р±РёР»РµС‚Рµ
         DBMS_OUTPUT.PUT_LINE(
             'Deleting Ticket: ' ||
             'Ticket ID: ' || v_ticket_info.ticket_id || ', ' ||
@@ -955,18 +955,18 @@ BEGIN
         DELETE FROM Tickets WHERE ticket_id = v_ticket_info.ticket_id;
     END LOOP;
 
-    -- Удаляем сам рейс
+    -- РЈРґР°Р»СЏРµРј СЃР°Рј СЂРµР№СЃ
     DELETE FROM admin.Flights
     WHERE flight_id = p_flight_id;
 
     DBMS_OUTPUT.PUT_LINE('Flight with ID ' || p_flight_id || ' has been successfully deleted.');
 
-    COMMIT; -- Подтверждаем изменения
+    COMMIT; -- РџРѕРґС‚РІРµСЂР¶РґР°РµРј РёР·РјРµРЅРµРЅРёСЏ
 
 EXCEPTION
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Unexpected error: ' || SQLERRM);
-        ROLLBACK; -- Откатываем изменения в случае ошибки
+        ROLLBACK; -- РћС‚РєР°С‚С‹РІР°РµРј РёР·РјРµРЅРµРЅРёСЏ РІ СЃР»СѓС‡Р°Рµ РѕС€РёР±РєРё
         RAISE_APPLICATION_ERROR(-20004, 'Unexpected error occurred: ' || SQLERRM);
 END sp_delete_flight;
 /
@@ -975,13 +975,13 @@ END sp_delete_flight;
 
 
 CREATE OR REPLACE PROCEDURE sp_add_flight (
-    p_departure_airport_id  IN NUMBER,    -- ID аэропорта вылета
-    p_arrival_airport_id    IN NUMBER,    -- ID аэропорта прилета
-    p_departure_time        IN VARCHAR2,  -- Время вылета в формате VARCHAR
-    p_arrival_time          IN VARCHAR2,  -- Время прилета в формате VARCHAR
-    p_flight_status         IN VARCHAR2,  -- Статус рейса (e.g., Scheduled, Delayed)
-    p_airplane_id           IN NUMBER,    -- ID самолета
-    p_airline_id            IN NUMBER     -- ID авиалинии
+    p_departure_airport_id  IN NUMBER,    -- ID Р°СЌСЂРѕРїРѕСЂС‚Р° РІС‹Р»РµС‚Р°
+    p_arrival_airport_id    IN NUMBER,    -- ID Р°СЌСЂРѕРїРѕСЂС‚Р° РїСЂРёР»РµС‚Р°
+    p_departure_time        IN VARCHAR2,  -- Р’СЂРµРјСЏ РІС‹Р»РµС‚Р° РІ С„РѕСЂРјР°С‚Рµ VARCHAR
+    p_arrival_time          IN VARCHAR2,  -- Р’СЂРµРјСЏ РїСЂРёР»РµС‚Р° РІ С„РѕСЂРјР°С‚Рµ VARCHAR
+    p_flight_status         IN VARCHAR2,  -- РЎС‚Р°С‚СѓСЃ СЂРµР№СЃР° (e.g., Scheduled, Delayed)
+    p_airplane_id           IN NUMBER,    -- ID СЃР°РјРѕР»РµС‚Р°
+    p_airline_id            IN NUMBER     -- ID Р°РІРёР°Р»РёРЅРёРё
 )
 AUTHID DEFINER
 IS
@@ -995,13 +995,13 @@ IS
     v_flight_id               NUMBER;
     v_flight_number           VARCHAR2(20);
 BEGIN
-    -- Проверяем, что аэропорт вылета и прилета не совпадают
+    -- РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ Р°СЌСЂРѕРїРѕСЂС‚ РІС‹Р»РµС‚Р° Рё РїСЂРёР»РµС‚Р° РЅРµ СЃРѕРІРїР°РґР°СЋС‚
     IF p_departure_airport_id = p_arrival_airport_id THEN
         DBMS_OUTPUT.PUT_LINE('Error: Departure and arrival airports cannot be the same.');
         RAISE_APPLICATION_ERROR(-20003, 'Departure and arrival airports cannot be the same.');
     END IF;
 
-    -- Преобразуем время вылета и прилета в тип DATE
+    -- РџСЂРµРѕР±СЂР°Р·СѓРµРј РІСЂРµРјСЏ РІС‹Р»РµС‚Р° Рё РїСЂРёР»РµС‚Р° РІ С‚РёРї DATE
     BEGIN
         v_departure_date := TO_DATE(p_departure_time, 'YYYY-MM-DD HH24:MI');
         v_arrival_date := TO_DATE(p_arrival_time, 'YYYY-MM-DD HH24:MI');
@@ -1011,13 +1011,13 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20001, 'Invalid date format.');
     END;
 
-    -- Проверяем, что время вылета больше текущего времени
+    -- РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІСЂРµРјСЏ РІС‹Р»РµС‚Р° Р±РѕР»СЊС€Рµ С‚РµРєСѓС‰РµРіРѕ РІСЂРµРјРµРЅРё
     IF v_departure_date <= SYSDATE THEN
         DBMS_OUTPUT.PUT_LINE('Error: Departure time must be in the future.');
         RAISE_APPLICATION_ERROR(-20002, 'Departure time is in the past.');
     END IF;
 
-    -- Получаем название аэропорта вылета
+    -- РџРѕР»СѓС‡Р°РµРј РЅР°Р·РІР°РЅРёРµ Р°СЌСЂРѕРїРѕСЂС‚Р° РІС‹Р»РµС‚Р°
     BEGIN
         SELECT airport_name
         INTO v_departure_airport_name
@@ -1029,7 +1029,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20004, 'Departure airport does not exist.');
     END;
 
-    -- Получаем название аэропорта прилета
+    -- РџРѕР»СѓС‡Р°РµРј РЅР°Р·РІР°РЅРёРµ Р°СЌСЂРѕРїРѕСЂС‚Р° РїСЂРёР»РµС‚Р°
     BEGIN
         SELECT airport_name
         INTO v_arrival_airport_name
@@ -1041,7 +1041,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20005, 'Arrival airport does not exist.');
     END;
 
-    -- Проверяем существование самолета
+    -- РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ СЃР°РјРѕР»РµС‚Р°
     BEGIN
         SELECT airplane_model, manufacturer
         INTO v_airplane_model, v_airplane_manufacturer
@@ -1053,7 +1053,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20006, 'Airplane does not exist.');
     END;
 
-    -- Проверяем существование авиалинии
+    -- РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ Р°РІРёР°Р»РёРЅРёРё
     BEGIN
         SELECT airline_name
         INTO v_airline_name
@@ -1065,13 +1065,13 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20007, 'Airline does not exist.');
     END;
 
-    -- Проверяем корректность времени вылета и прилета
+    -- РџСЂРѕРІРµСЂСЏРµРј РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚СЊ РІСЂРµРјРµРЅРё РІС‹Р»РµС‚Р° Рё РїСЂРёР»РµС‚Р°
     IF v_departure_date >= v_arrival_date THEN
         DBMS_OUTPUT.PUT_LINE('Error: Departure time must be earlier than arrival time.');
         RAISE_APPLICATION_ERROR(-20010, 'Invalid departure and arrival times.');
     END IF;
 
-    -- Добавляем рейс и возвращаем сгенерированный ID рейса
+    -- Р”РѕР±Р°РІР»СЏРµРј СЂРµР№СЃ Рё РІРѕР·РІСЂР°С‰Р°РµРј СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅРЅС‹Р№ ID СЂРµР№СЃР°
     INSERT INTO admin.Flights (
         departure_airport_id,
         arrival_airport_id,
@@ -1091,7 +1091,7 @@ BEGIN
     )
     RETURNING flight_id INTO v_flight_id;
 
-    -- Получаем номер рейса, если он генерируется автоматически
+    -- РџРѕР»СѓС‡Р°РµРј РЅРѕРјРµСЂ СЂРµР№СЃР°, РµСЃР»Рё РѕРЅ РіРµРЅРµСЂРёСЂСѓРµС‚СЃСЏ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё
     BEGIN
         SELECT flight_number
         INTO v_flight_number
@@ -1103,7 +1103,7 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20012, 'Failed to retrieve flight number.');
     END;
 
-    -- Вывод информации о рейсе
+    -- Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЂРµР№СЃРµ
     DBMS_OUTPUT.PUT_LINE('Flight has been successfully added:');
     DBMS_OUTPUT.PUT_LINE('Flight Number: ' || v_flight_number);
     DBMS_OUTPUT.PUT_LINE('Departure Airport: ' || v_departure_airport_name || ' (ID: ' || p_departure_airport_id || ')');
@@ -1117,7 +1117,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Airline ID: ' || p_airline_id);
     DBMS_OUTPUT.PUT_LINE('Airline Name: ' || v_airline_name);
 
-    -- Подтверждаем транзакцию
+    -- РџРѕРґС‚РІРµСЂР¶РґР°РµРј С‚СЂР°РЅР·Р°РєС†РёСЋ
     COMMIT;
 
 EXCEPTION
@@ -1132,15 +1132,15 @@ END sp_add_flight;
 
 
 CREATE OR REPLACE PROCEDURE sp_update_flight ( 
-    p_flight_id               IN NUMBER,        -- ID рейса
-    p_new_departure_airport_id IN NUMBER DEFAULT NULL,     -- Новый ID аэропорта вылета
-    p_new_arrival_airport_id   IN NUMBER DEFAULT NULL,     -- Новый ID аэропорта прилета
-    p_new_departure_time      IN VARCHAR2 DEFAULT NULL,     -- Новое время вылета
-    p_new_arrival_time        IN VARCHAR2 DEFAULT NULL      -- Новое время прилета
+    p_flight_id               IN NUMBER,        -- ID СЂРµР№СЃР°
+    p_new_departure_airport_id IN NUMBER DEFAULT NULL,     -- РќРѕРІС‹Р№ ID Р°СЌСЂРѕРїРѕСЂС‚Р° РІС‹Р»РµС‚Р°
+    p_new_arrival_airport_id   IN NUMBER DEFAULT NULL,     -- РќРѕРІС‹Р№ ID Р°СЌСЂРѕРїРѕСЂС‚Р° РїСЂРёР»РµС‚Р°
+    p_new_departure_time      IN VARCHAR2 DEFAULT NULL,     -- РќРѕРІРѕРµ РІСЂРµРјСЏ РІС‹Р»РµС‚Р°
+    p_new_arrival_time        IN VARCHAR2 DEFAULT NULL      -- РќРѕРІРѕРµ РІСЂРµРјСЏ РїСЂРёР»РµС‚Р°
 )
 AUTHID DEFINER
 IS
-    -- Старые данные рейса
+    -- РЎС‚Р°СЂС‹Рµ РґР°РЅРЅС‹Рµ СЂРµР№СЃР°
     v_flight_status           VARCHAR2(20);
     v_flight_number           VARCHAR2(20); 
     v_old_departure_airport_id    NUMBER;
@@ -1148,19 +1148,19 @@ IS
     v_old_departure_time          DATE;
     v_old_arrival_time            DATE;
 
-    -- Новые значения
+    -- РќРѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
     v_new_departure_airport_id    NUMBER;
     v_new_arrival_airport_id      NUMBER;
     v_new_departure_time          DATE;
     v_new_arrival_time            DATE;
 
-    -- Названия аэропортов
+    -- РќР°Р·РІР°РЅРёСЏ Р°СЌСЂРѕРїРѕСЂС‚РѕРІ
     v_old_departure_airport_name  VARCHAR2(100);
     v_old_arrival_airport_name    VARCHAR2(100);
     v_new_departure_airport_name  VARCHAR2(100);
     v_new_arrival_airport_name    VARCHAR2(100);
 BEGIN
-    -- Получаем текущие данные рейса
+    -- РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РёРµ РґР°РЅРЅС‹Рµ СЂРµР№СЃР°
     BEGIN
         SELECT flight_status, flight_number, departure_airport_id, arrival_airport_id, departure_time, arrival_time
         INTO v_flight_status, v_flight_number, v_old_departure_airport_id, v_old_arrival_airport_id, v_old_departure_time, v_old_arrival_time
@@ -1171,11 +1171,11 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20001, 'Flight does not exist.');
     END;
 
-    -- Получаем названия старых аэропортов
+    -- РџРѕР»СѓС‡Р°РµРј РЅР°Р·РІР°РЅРёСЏ СЃС‚Р°СЂС‹С… Р°СЌСЂРѕРїРѕСЂС‚РѕРІ
     SELECT airport_name INTO v_old_departure_airport_name FROM admin.Airports WHERE airport_id = v_old_departure_airport_id;
     SELECT airport_name INTO v_old_arrival_airport_name FROM admin.Airports WHERE airport_id = v_old_arrival_airport_id;
 
-    -- Обрабатываем новые данные
+    -- РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РЅРѕРІС‹Рµ РґР°РЅРЅС‹Рµ
     v_new_departure_airport_id := COALESCE(p_new_departure_airport_id, v_old_departure_airport_id);
     v_new_arrival_airport_id   := COALESCE(p_new_arrival_airport_id, v_old_arrival_airport_id);
 
@@ -1191,16 +1191,16 @@ BEGIN
         v_new_arrival_time := v_old_arrival_time;
     END IF;
 
-    -- Проверка на одинаковые аэропорты
+    -- РџСЂРѕРІРµСЂРєР° РЅР° РѕРґРёРЅР°РєРѕРІС‹Рµ Р°СЌСЂРѕРїРѕСЂС‚С‹
     IF v_new_departure_airport_id = v_new_arrival_airport_id THEN
         RAISE_APPLICATION_ERROR(-20009, 'Departure and arrival airports cannot be the same.');
     END IF;
 
-    -- Получаем названия новых аэропортов
+    -- РџРѕР»СѓС‡Р°РµРј РЅР°Р·РІР°РЅРёСЏ РЅРѕРІС‹С… Р°СЌСЂРѕРїРѕСЂС‚РѕРІ
     SELECT airport_name INTO v_new_departure_airport_name FROM admin.Airports WHERE airport_id = v_new_departure_airport_id;
     SELECT airport_name INTO v_new_arrival_airport_name FROM admin.Airports WHERE airport_id = v_new_arrival_airport_id;
 
-    -- Обновляем рейс
+    -- РћР±РЅРѕРІР»СЏРµРј СЂРµР№СЃ
     UPDATE admin.Flights
     SET departure_airport_id = v_new_departure_airport_id,
         arrival_airport_id   = v_new_arrival_airport_id,
@@ -1208,7 +1208,7 @@ BEGIN
         arrival_time         = v_new_arrival_time
     WHERE flight_id = p_flight_id;
 
-    -- Вывод старой информации о рейсе
+    -- Р’С‹РІРѕРґ СЃС‚Р°СЂРѕР№ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЂРµР№СЃРµ
     DBMS_OUTPUT.PUT_LINE('--- Old Flight Information ---');
     DBMS_OUTPUT.PUT_LINE('Flight Number: ' || v_flight_number);
     DBMS_OUTPUT.PUT_LINE('Flight ID: ' || p_flight_id);
@@ -1217,7 +1217,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Old Departure Time: ' || TO_CHAR(v_old_departure_time, 'YYYY-MM-DD HH24:MI'));
     DBMS_OUTPUT.PUT_LINE('Old Arrival Time: ' || TO_CHAR(v_old_arrival_time, 'YYYY-MM-DD HH24:MI'));
 
-    -- Вывод новой информации о рейсе
+    -- Р’С‹РІРѕРґ РЅРѕРІРѕР№ РёРЅС„РѕСЂРјР°С†РёРё Рѕ СЂРµР№СЃРµ
     DBMS_OUTPUT.PUT_LINE('--- New Flight Information ---');
     DBMS_OUTPUT.PUT_LINE('Flight Number: ' || v_flight_number);
     DBMS_OUTPUT.PUT_LINE('Flight ID: ' || p_flight_id);
@@ -1247,7 +1247,7 @@ AS
     v_airport_name NVARCHAR2(200);
     v_employee_count NUMBER;
 BEGIN
-    -- Проверяем, существует ли аэропорт с указанным ID
+    -- РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё Р°СЌСЂРѕРїРѕСЂС‚ СЃ СѓРєР°Р·Р°РЅРЅС‹Рј ID
     BEGIN
         SELECT airport_name
         INTO v_airport_name
@@ -1258,19 +1258,19 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20001, 'Airport with the specified ID does not exist.');
     END;
 
-    -- Считаем количество сотрудников, связанных с этим аэропортом
+    -- РЎС‡РёС‚Р°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ, СЃРІСЏР·Р°РЅРЅС‹С… СЃ СЌС‚РёРј Р°СЌСЂРѕРїРѕСЂС‚РѕРј
     SELECT COUNT(*)
     INTO v_employee_count
     FROM admin.Employee
     WHERE airport_id = p_airport_id;
 
-    -- Если сотрудников нет, выводим сообщение
+    -- Р•СЃР»Рё СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ РЅРµС‚, РІС‹РІРѕРґРёРј СЃРѕРѕР±С‰РµРЅРёРµ
     IF v_employee_count = 0 THEN
         DBMS_OUTPUT.PUT_LINE('No employees are associated with the airport: ' || v_airport_name);
     ELSE
         DBMS_OUTPUT.PUT_LINE('List of employees for the airport: ' || v_airport_name);
 
-        -- Извлекаем и отображаем информацию о сотрудниках через представление Users_View
+        -- РР·РІР»РµРєР°РµРј Рё РѕС‚РѕР±СЂР°Р¶Р°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ СЃРѕС‚СЂСѓРґРЅРёРєР°С… С‡РµСЂРµР· РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРµ Users_View
         FOR employee_rec IN (
             SELECT uv.firstname, uv.lastname, uv.email, uv.phone, e.job_title, e.hire_date, e.salary
             FROM admin.Employee e

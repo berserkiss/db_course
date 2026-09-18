@@ -4,10 +4,10 @@ CREATE DIRECTORY JSON_DIR AS '/opt/oracle/oradata/XE/TablesJson';
 CREATE OR REPLACE PROCEDURE export_users AS
     l_file UTL_FILE.FILE_TYPE;
 BEGIN
-    -- Открытие файла для записи
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РґР»СЏ Р·Р°РїРёСЃРё
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'users.json', 'w', 32767);
 
-    -- Итерация по строкам таблицы Users
+    -- РС‚РµСЂР°С†РёСЏ РїРѕ СЃС‚СЂРѕРєР°Рј С‚Р°Р±Р»РёС†С‹ Users
     FOR rec IN (
         SELECT 
             user_id, username, user_password, passport_number, email, phone, 
@@ -15,7 +15,7 @@ BEGIN
         FROM Users
         ORDER BY user_id
     ) LOOP
-        -- Запись строки JSON в файл
+        -- Р—Р°РїРёСЃСЊ СЃС‚СЂРѕРєРё JSON РІ С„Р°Р№Р»
         UTL_FILE.PUT_LINE(
             l_file, 
             '{"user_id": ' || rec.user_id ||
@@ -34,10 +34,10 @@ BEGIN
         );
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Экспорт таблицы Users завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('Р­РєСЃРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Users Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -45,7 +45,7 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END export_users;
 /
 
@@ -70,10 +70,10 @@ BEGIN
 
     LOOP
         BEGIN
-            -- Чтение строки JSON из файла
+            -- Р§С‚РµРЅРёРµ СЃС‚СЂРѕРєРё JSON РёР· С„Р°Р№Р»Р°
             UTL_FILE.GET_LINE(l_file, l_json_data);
 
-            -- Извлечение данных из JSON
+            -- РР·РІР»РµС‡РµРЅРёРµ РґР°РЅРЅС‹С… РёР· JSON
             SELECT 
                 JSON_VALUE(l_json_data, '$.user_id') AS user_id,
                 JSON_VALUE(l_json_data, '$.username') AS username,
@@ -84,7 +84,7 @@ BEGIN
                 JSON_VALUE(l_json_data, '$.is_active') AS is_active,
                 JSON_VALUE(l_json_data, '$.firstname') AS firstname,
                 JSON_VALUE(l_json_data, '$.lastname') AS lastname,
-                TO_DATE(JSON_VALUE(l_json_data, '$.birthdate'), 'YYYY-MM-DD') AS birthdate, -- Добавление TO_DATE
+                TO_DATE(JSON_VALUE(l_json_data, '$.birthdate'), 'YYYY-MM-DD') AS birthdate, -- Р”РѕР±Р°РІР»РµРЅРёРµ TO_DATE
                 JSON_VALUE(l_json_data, '$.country') AS country,
                 JSON_VALUE(l_json_data, '$.city') AS city,
                 JSON_VALUE(l_json_data, '$.street') AS street
@@ -95,7 +95,7 @@ BEGIN
             FROM DUAL;
 
 
-            -- MERGE для вставки или обновления
+            -- MERGE РґР»СЏ РІСЃС‚Р°РІРєРё РёР»Рё РѕР±РЅРѕРІР»РµРЅРёСЏ
             MERGE INTO Users u
             USING (
                 SELECT 
@@ -146,13 +146,13 @@ BEGIN
             WHEN DUP_VAL_ON_INDEX THEN
                 NULL;
             WHEN OTHERS THEN
-                DBMS_OUTPUT.PUT_LINE('Ошибка при импорте Users: ' || sqlerrm || ' Данные: ' || l_json_data);
+                DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ Users: ' || sqlerrm || ' Р”Р°РЅРЅС‹Рµ: ' || l_json_data);
         END;
     END LOOP;
 
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Импорт таблицы Users завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('РРјРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Users Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -160,23 +160,23 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END import_users;
 /
 
 CREATE OR REPLACE PROCEDURE export_airports AS
-    l_file UTL_FILE.FILE_TYPE; -- Объявление переменной для работы с файлом
+    l_file UTL_FILE.FILE_TYPE; -- РћР±СЉСЏРІР»РµРЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
 BEGIN
-    -- Открытие файла на запись
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° Р·Р°РїРёСЃСЊ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'airports.json', 'w', 32767);
 
-    -- Итерация по строкам таблицы Airports
+    -- РС‚РµСЂР°С†РёСЏ РїРѕ СЃС‚СЂРѕРєР°Рј С‚Р°Р±Р»РёС†С‹ Airports
     FOR rec IN (
         SELECT airport_id, iata_code, airport_name, city, country
         FROM Airports
         ORDER BY airport_id
     ) LOOP
-        -- Запись строки JSON в файл
+        -- Р—Р°РїРёСЃСЊ СЃС‚СЂРѕРєРё JSON РІ С„Р°Р№Р»
         UTL_FILE.PUT_LINE(
             l_file, 
             '{"airport_id": ' || rec.airport_id ||
@@ -187,10 +187,10 @@ BEGIN
         );
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Экспорт таблицы Airports завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('Р­РєСЃРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Airports Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -198,7 +198,7 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END export_airports;
 /
 
@@ -211,15 +211,15 @@ CREATE OR REPLACE PROCEDURE import_airports AS
     v_city VARCHAR2(50);
     v_country VARCHAR2(50);
 BEGIN
-    -- Открытие файла на чтение
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° С‡С‚РµРЅРёРµ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'airports.json', 'r', 32767);
 
     LOOP
         BEGIN
-            -- Чтение строки JSON из файла
+            -- Р§С‚РµРЅРёРµ СЃС‚СЂРѕРєРё JSON РёР· С„Р°Р№Р»Р°
             UTL_FILE.GET_LINE(l_file, l_json_data);
 
-            -- Извлечение данных из строки JSON
+            -- РР·РІР»РµС‡РµРЅРёРµ РґР°РЅРЅС‹С… РёР· СЃС‚СЂРѕРєРё JSON
             SELECT 
                 JSON_VALUE(l_json_data, '$.airport_id') AS airport_id,
                 JSON_VALUE(l_json_data, '$.iata_code') AS iata_code,
@@ -230,7 +230,7 @@ BEGIN
                 v_airport_id, v_iata_code, v_airport_name, v_city, v_country
             FROM DUAL;
 
-            -- MERGE для вставки или обновления
+            -- MERGE РґР»СЏ РІСЃС‚Р°РІРєРё РёР»Рё РѕР±РЅРѕРІР»РµРЅРёСЏ
             MERGE INTO Airports a
             USING (
                 SELECT 
@@ -261,14 +261,14 @@ BEGIN
             WHEN DUP_VAL_ON_INDEX THEN
                 NULL;
             WHEN OTHERS THEN
-                DBMS_OUTPUT.PUT_LINE('Ошибка при импорте Airports: ' || sqlerrm || ' Данные: ' || l_json_data);
+                DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ Airports: ' || sqlerrm || ' Р”Р°РЅРЅС‹Рµ: ' || l_json_data);
         END;
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Импорт таблицы Airports завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('РРјРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Airports Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -276,23 +276,23 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END import_airports;
 /
 
 CREATE OR REPLACE PROCEDURE export_employee AS
-    l_file UTL_FILE.FILE_TYPE; -- Переменная для работы с файлом
+    l_file UTL_FILE.FILE_TYPE; -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
 BEGIN
-    -- Открытие файла на запись
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° Р·Р°РїРёСЃСЊ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'employee.json', 'w', 32767);
 
-    -- Итерация по строкам таблицы Employee
+    -- РС‚РµСЂР°С†РёСЏ РїРѕ СЃС‚СЂРѕРєР°Рј С‚Р°Р±Р»РёС†С‹ Employee
     FOR rec IN (
         SELECT employee_id, user_id, airport_id, job_title, hire_date, salary
         FROM Employee
          ORDER BY employee_id
     ) LOOP
-        -- Запись строки JSON в файл
+        -- Р—Р°РїРёСЃСЊ СЃС‚СЂРѕРєРё JSON РІ С„Р°Р№Р»
         UTL_FILE.PUT_LINE(
             l_file, 
             '{"employee_id": ' || rec.employee_id ||
@@ -304,10 +304,10 @@ BEGIN
         );
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Экспорт таблицы Employee завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('Р­РєСЃРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Employee Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -315,13 +315,13 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END export_employee;
 /
 
 CREATE OR REPLACE PROCEDURE import_employee AS
-    l_file UTL_FILE.FILE_TYPE; -- Переменная для работы с файлом
-    l_json_data VARCHAR2(32767); -- Переменная для хранения строки JSON
+    l_file UTL_FILE.FILE_TYPE; -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
+    l_json_data VARCHAR2(32767); -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ СЃС‚СЂРѕРєРё JSON
     v_employee_id NUMBER;
     v_user_id NUMBER;
     v_airport_id NUMBER;
@@ -329,15 +329,15 @@ CREATE OR REPLACE PROCEDURE import_employee AS
     v_hire_date DATE;
     v_salary NUMBER;
 BEGIN
-    -- Открытие файла на чтение
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° С‡С‚РµРЅРёРµ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'employee.json', 'r', 32767);
 
     LOOP
         BEGIN
-            -- Чтение строки JSON
+            -- Р§С‚РµРЅРёРµ СЃС‚СЂРѕРєРё JSON
             UTL_FILE.GET_LINE(l_file, l_json_data);
 
-            -- Извлечение данных из строки JSON
+            -- РР·РІР»РµС‡РµРЅРёРµ РґР°РЅРЅС‹С… РёР· СЃС‚СЂРѕРєРё JSON
             SELECT 
                 JSON_VALUE(l_json_data, '$.employee_id') AS employee_id,
                 JSON_VALUE(l_json_data, '$.user_id') AS user_id,
@@ -349,7 +349,7 @@ BEGIN
                 v_employee_id, v_user_id, v_airport_id, v_job_title, v_hire_date, v_salary
             FROM DUAL;
 
-            -- Вставка или обновление данных
+            -- Р’СЃС‚Р°РІРєР° РёР»Рё РѕР±РЅРѕРІР»РµРЅРёРµ РґР°РЅРЅС‹С…
             MERGE INTO Employee e
             USING (
                 SELECT v_employee_id AS employee_id FROM DUAL
@@ -375,15 +375,15 @@ BEGIN
             WHEN DUP_VAL_ON_INDEX THEN
                 NULL;
             WHEN OTHERS THEN
-                DBMS_OUTPUT.PUT_LINE('Ошибка при импорте Employee: ' || sqlerrm || ' Данные: ' || l_json_data);
+                DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ Employee: ' || sqlerrm || ' Р”Р°РЅРЅС‹Рµ: ' || l_json_data);
                 RETURN;
         END;
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Импорт таблицы Employee завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('РРјРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Employee Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -391,37 +391,37 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END import_employee;
 /
 
 CREATE OR REPLACE PROCEDURE export_airplane_types AS
-    l_file UTL_FILE.FILE_TYPE; -- Переменная для работы с файлом
+    l_file UTL_FILE.FILE_TYPE; -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
 BEGIN
-    -- Открытие файла на запись
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° Р·Р°РїРёСЃСЊ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'airplane_types.json', 'w', 32767);
 
-    -- Итерация по строкам таблицы Airplane_Types
+    -- РС‚РµСЂР°С†РёСЏ РїРѕ СЃС‚СЂРѕРєР°Рј С‚Р°Р±Р»РёС†С‹ Airplane_Types
     FOR rec IN (
         SELECT type_id, airplane_model, manufacturer, seating_capacity, airplane_description
         FROM Airplane_Types
         ORDER BY type_id
     ) LOOP
-        -- Запись строки JSON в файл
+        -- Р—Р°РїРёСЃСЊ СЃС‚СЂРѕРєРё JSON РІ С„Р°Р№Р»
         UTL_FILE.PUT_LINE(
             l_file, 
-            '{"type_id": ' || TO_CHAR(rec.type_id) || -- Явное преобразование числа в строку
+            '{"type_id": ' || TO_CHAR(rec.type_id) || -- РЇРІРЅРѕРµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ С‡РёСЃР»Р° РІ СЃС‚СЂРѕРєСѓ
             ', "airplane_model": "' || rec.airplane_model ||
             '", "manufacturer": "' || rec.manufacturer ||
-            '", "seating_capacity": ' || TO_CHAR(rec.seating_capacity) || -- Явное преобразование
-            ', "airplane_description": "' || NVL(rec.airplane_description, '') || '"}' -- NULL обработан через NVL
+            '", "seating_capacity": ' || TO_CHAR(rec.seating_capacity) || -- РЇРІРЅРѕРµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ
+            ', "airplane_description": "' || NVL(rec.airplane_description, '') || '"}' -- NULL РѕР±СЂР°Р±РѕС‚Р°РЅ С‡РµСЂРµР· NVL
         );
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Экспорт таблицы Airplane_Types завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('Р­РєСЃРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Airplane_Types Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -429,29 +429,29 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END export_airplane_types;
 /
 
 
 CREATE OR REPLACE PROCEDURE import_airplane_types AS
-    l_file UTL_FILE.FILE_TYPE; -- Переменная для работы с файлом
-    l_json_data VARCHAR2(32767); -- Переменная для хранения строки JSON
+    l_file UTL_FILE.FILE_TYPE; -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
+    l_json_data VARCHAR2(32767); -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ СЃС‚СЂРѕРєРё JSON
     v_type_id NUMBER;
     v_airplane_model VARCHAR2(50);
     v_manufacturer VARCHAR2(50);
     v_seating_capacity NUMBER;
     v_airplane_description VARCHAR2(200);
 BEGIN
-    -- Открытие файла на чтение
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° С‡С‚РµРЅРёРµ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'airplane_types.json', 'r', 32767);
 
     LOOP
         BEGIN
-            -- Чтение строки JSON
+            -- Р§С‚РµРЅРёРµ СЃС‚СЂРѕРєРё JSON
             UTL_FILE.GET_LINE(l_file, l_json_data);
 
-            -- Извлечение данных из строки JSON
+            -- РР·РІР»РµС‡РµРЅРёРµ РґР°РЅРЅС‹С… РёР· СЃС‚СЂРѕРєРё JSON
             SELECT 
                 JSON_VALUE(l_json_data, '$.type_id') AS type_id,
                 JSON_VALUE(l_json_data, '$.airplane_model') AS airplane_model,
@@ -462,7 +462,7 @@ BEGIN
                 v_type_id, v_airplane_model, v_manufacturer, v_seating_capacity, v_airplane_description
             FROM DUAL;
 
-            -- Вставка или обновление данных
+            -- Р’СЃС‚Р°РІРєР° РёР»Рё РѕР±РЅРѕРІР»РµРЅРёРµ РґР°РЅРЅС‹С…
             MERGE INTO Airplane_Types t
             USING (
                 SELECT v_type_id AS type_id FROM DUAL
@@ -487,15 +487,15 @@ BEGIN
             WHEN DUP_VAL_ON_INDEX THEN
                 NULL;
             WHEN OTHERS THEN
-                DBMS_OUTPUT.PUT_LINE('Ошибка при импорте Airplane_Types: ' || sqlerrm || ' Данные: ' || l_json_data);
+                DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ Airplane_Types: ' || sqlerrm || ' Р”Р°РЅРЅС‹Рµ: ' || l_json_data);
                 RETURN;
         END;
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Импорт таблицы Airplane_Types завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('РРјРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Airplane_Types Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -503,41 +503,41 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END import_airplane_types;
 /
 
 CREATE OR REPLACE PROCEDURE export_airlines AS
-    l_file UTL_FILE.FILE_TYPE; -- Переменная для работы с файлом
+    l_file UTL_FILE.FILE_TYPE; -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
 BEGIN
-    -- Открытие файла на запись
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° Р·Р°РїРёСЃСЊ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'airlines.json', 'w', 32767);
 
-    -- Итерация по строкам таблицы Airlines
+    -- РС‚РµСЂР°С†РёСЏ РїРѕ СЃС‚СЂРѕРєР°Рј С‚Р°Р±Р»РёС†С‹ Airlines
     FOR rec IN (
         SELECT airline_id, iata_code, airline_name, country, base_airport_id
         FROM Airlines
         ORDER BY airline_id
     ) LOOP
-        -- Запись строки JSON в файл
+        -- Р—Р°РїРёСЃСЊ СЃС‚СЂРѕРєРё JSON РІ С„Р°Р№Р»
         UTL_FILE.PUT_LINE(
             l_file, 
-            '{"airline_id": ' || TO_CHAR(rec.airline_id) || -- Явное преобразование числа
+            '{"airline_id": ' || TO_CHAR(rec.airline_id) || -- РЇРІРЅРѕРµ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ С‡РёСЃР»Р°
             ', "iata_code": "' || rec.iata_code ||
             '", "airline_name": "' || rec.airline_name ||
             '", "country": "' || NVL(rec.country, '') ||
             '", "base_airport_id": ' || 
             CASE 
-                WHEN rec.base_airport_id IS NULL THEN 'null' -- Обработка NULL как "null" в JSON
-                ELSE TO_CHAR(rec.base_airport_id) -- Преобразование числа в строку
+                WHEN rec.base_airport_id IS NULL THEN 'null' -- РћР±СЂР°Р±РѕС‚РєР° NULL РєР°Рє "null" РІ JSON
+                ELSE TO_CHAR(rec.base_airport_id) -- РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ С‡РёСЃР»Р° РІ СЃС‚СЂРѕРєСѓ
             END || '}'
         );
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Экспорт таблицы Airlines завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('Р­РєСЃРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Airlines Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -545,29 +545,29 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END export_airlines;
 /
 
 
 CREATE OR REPLACE PROCEDURE import_airlines AS
-    l_file UTL_FILE.FILE_TYPE; -- Переменная для работы с файлом
-    l_json_data VARCHAR2(32767); -- Переменная для хранения строки JSON
+    l_file UTL_FILE.FILE_TYPE; -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
+    l_json_data VARCHAR2(32767); -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ СЃС‚СЂРѕРєРё JSON
     v_airline_id NUMBER;
     v_iata_code CHAR(2);
     v_airline_name VARCHAR2(100);
     v_country VARCHAR2(50);
     v_base_airport_id NUMBER;
 BEGIN
-    -- Открытие файла на чтение
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° С‡С‚РµРЅРёРµ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'airlines.json', 'r', 32767);
 
     LOOP
         BEGIN
-            -- Чтение строки JSON
+            -- Р§С‚РµРЅРёРµ СЃС‚СЂРѕРєРё JSON
             UTL_FILE.GET_LINE(l_file, l_json_data);
 
-            -- Извлечение данных из строки JSON
+            -- РР·РІР»РµС‡РµРЅРёРµ РґР°РЅРЅС‹С… РёР· СЃС‚СЂРѕРєРё JSON
             SELECT 
                 JSON_VALUE(l_json_data, '$.airline_id') AS airline_id,
                 JSON_VALUE(l_json_data, '$.iata_code') AS iata_code,
@@ -578,7 +578,7 @@ BEGIN
                 v_airline_id, v_iata_code, v_airline_name, v_country, v_base_airport_id
             FROM DUAL;
 
-            -- Вставка или обновление данных
+            -- Р’СЃС‚Р°РІРєР° РёР»Рё РѕР±РЅРѕРІР»РµРЅРёРµ РґР°РЅРЅС‹С…
             MERGE INTO Airlines t
             USING (
                 SELECT v_airline_id AS airline_id FROM DUAL
@@ -603,15 +603,15 @@ BEGIN
             WHEN DUP_VAL_ON_INDEX THEN
                 NULL;
             WHEN OTHERS THEN
-                DBMS_OUTPUT.PUT_LINE('Ошибка при импорте Airlines: ' || sqlerrm || ' Данные: ' || l_json_data);
+                DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ Airlines: ' || sqlerrm || ' Р”Р°РЅРЅС‹Рµ: ' || l_json_data);
                 RETURN;
         END;
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Импорт таблицы Airlines завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('РРјРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Airlines Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -619,23 +619,23 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END import_airlines;
 /
 
 CREATE OR REPLACE PROCEDURE export_airplanes AS
-    l_file UTL_FILE.FILE_TYPE; -- Переменная для работы с файлом
+    l_file UTL_FILE.FILE_TYPE; -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
 BEGIN
-    -- Открытие файла на запись
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° Р·Р°РїРёСЃСЊ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'airplanes.json', 'w', 32767);
 
-    -- Итерация по строкам таблицы Airplanes
+    -- РС‚РµСЂР°С†РёСЏ РїРѕ СЃС‚СЂРѕРєР°Рј С‚Р°Р±Р»РёС†С‹ Airplanes
     FOR rec IN (
         SELECT airplane_id, type_id, airline_id, tail_number, airplane_status
         FROM Airplanes
         ORDER BY airplane_id
     ) LOOP
-        -- Запись строки JSON в файл
+        -- Р—Р°РїРёСЃСЊ СЃС‚СЂРѕРєРё JSON РІ С„Р°Р№Р»
         UTL_FILE.PUT_LINE(
             l_file, 
             '{"airplane_id": ' || rec.airplane_id ||
@@ -646,10 +646,10 @@ BEGIN
         );
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Экспорт таблицы Airplanes завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('Р­РєСЃРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Airplanes Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -657,28 +657,28 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END export_airplanes;
 /
 
 CREATE OR REPLACE PROCEDURE import_airplanes AS
-    l_file UTL_FILE.FILE_TYPE; -- Переменная для работы с файлом
-    l_json_data VARCHAR2(32767); -- Переменная для хранения строки JSON
+    l_file UTL_FILE.FILE_TYPE; -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
+    l_json_data VARCHAR2(32767); -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ СЃС‚СЂРѕРєРё JSON
     v_airplane_id NUMBER;
     v_type_id NUMBER;
     v_airline_id NUMBER;
     v_tail_number VARCHAR2(20);
     v_airplane_status VARCHAR2(20);
 BEGIN
-    -- Открытие файла на чтение
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° С‡С‚РµРЅРёРµ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'airplanes.json', 'r', 32767);
 
     LOOP
         BEGIN
-            -- Чтение строки JSON
+            -- Р§С‚РµРЅРёРµ СЃС‚СЂРѕРєРё JSON
             UTL_FILE.GET_LINE(l_file, l_json_data);
 
-            -- Извлечение данных из строки JSON
+            -- РР·РІР»РµС‡РµРЅРёРµ РґР°РЅРЅС‹С… РёР· СЃС‚СЂРѕРєРё JSON
             SELECT 
                 JSON_VALUE(l_json_data, '$.airplane_id') AS airplane_id,
                 JSON_VALUE(l_json_data, '$.type_id') AS type_id,
@@ -689,7 +689,7 @@ BEGIN
                 v_airplane_id, v_type_id, v_airline_id, v_tail_number, v_airplane_status
             FROM DUAL;
 
-            -- Вставка или обновление данных
+            -- Р’СЃС‚Р°РІРєР° РёР»Рё РѕР±РЅРѕРІР»РµРЅРёРµ РґР°РЅРЅС‹С…
             MERGE INTO Airplanes t
             USING (
                 SELECT v_airplane_id AS airplane_id FROM DUAL
@@ -714,15 +714,15 @@ BEGIN
             WHEN DUP_VAL_ON_INDEX THEN
                 NULL;
             WHEN OTHERS THEN
-                DBMS_OUTPUT.PUT_LINE('Ошибка при импорте Airplanes: ' || sqlerrm || ' Данные: ' || l_json_data);
+                DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ Airplanes: ' || sqlerrm || ' Р”Р°РЅРЅС‹Рµ: ' || l_json_data);
                 RETURN;
         END;
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Импорт таблицы Airplanes завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('РРјРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Airplanes Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -730,17 +730,17 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END import_airplanes;
 /
 
 CREATE OR REPLACE PROCEDURE export_flights AS
-    l_file UTL_FILE.FILE_TYPE; -- Переменная для работы с файлом
+    l_file UTL_FILE.FILE_TYPE; -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
 BEGIN
-    -- Открытие файла на запись
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° Р·Р°РїРёСЃСЊ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'flights.json', 'w', 32767);
 
-    -- Итерация по строкам таблицы Flights
+    -- РС‚РµСЂР°С†РёСЏ РїРѕ СЃС‚СЂРѕРєР°Рј С‚Р°Р±Р»РёС†С‹ Flights
     FOR rec IN (
         SELECT 
             flight_id, flight_number, departure_airport_id, arrival_airport_id, 
@@ -750,7 +750,7 @@ BEGIN
         FROM Flights
         ORDER BY flight_id
     ) LOOP
-        -- Запись строки JSON в файл
+        -- Р—Р°РїРёСЃСЊ СЃС‚СЂРѕРєРё JSON РІ С„Р°Р№Р»
         UTL_FILE.PUT_LINE(
             l_file, 
             '{"flight_id": ' || rec.flight_id ||
@@ -765,10 +765,10 @@ BEGIN
         );
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Экспорт таблицы Flights завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('Р­РєСЃРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Flights Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -776,13 +776,13 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END export_flights;
 /
 
 CREATE OR REPLACE PROCEDURE import_flights AS
-    l_file UTL_FILE.FILE_TYPE; -- Переменная для работы с файлом
-    l_json_data VARCHAR2(32767); -- Переменная для строки JSON
+    l_file UTL_FILE.FILE_TYPE; -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРј
+    l_json_data VARCHAR2(32767); -- РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ СЃС‚СЂРѕРєРё JSON
     v_flight_id NUMBER;
     v_flight_number VARCHAR2(20);
     v_departure_airport_id NUMBER;
@@ -793,15 +793,15 @@ CREATE OR REPLACE PROCEDURE import_flights AS
     v_airplane_id NUMBER;
     v_flight_status VARCHAR2(20);
 BEGIN
-    -- Открытие файла на чтение
+    -- РћС‚РєСЂС‹С‚РёРµ С„Р°Р№Р»Р° РЅР° С‡С‚РµРЅРёРµ
     l_file := UTL_FILE.FOPEN('JSON_DIR', 'flights.json', 'r', 32767);
 
     LOOP
         BEGIN
-            -- Чтение строки JSON
+            -- Р§С‚РµРЅРёРµ СЃС‚СЂРѕРєРё JSON
             UTL_FILE.GET_LINE(l_file, l_json_data);
 
-            -- Извлечение данных из строки JSON
+            -- РР·РІР»РµС‡РµРЅРёРµ РґР°РЅРЅС‹С… РёР· СЃС‚СЂРѕРєРё JSON
             SELECT 
                 JSON_VALUE(l_json_data, '$.flight_id') AS flight_id,
                 JSON_VALUE(l_json_data, '$.flight_number') AS flight_number,
@@ -817,12 +817,12 @@ BEGIN
                 v_departure_time, v_arrival_time, v_airline_id, v_airplane_id, v_flight_status
             FROM DUAL;
 
-            -- Проверка логики и вставка/обновление
+            -- РџСЂРѕРІРµСЂРєР° Р»РѕРіРёРєРё Рё РІСЃС‚Р°РІРєР°/РѕР±РЅРѕРІР»РµРЅРёРµ
             IF v_departure_time >= v_arrival_time THEN
-                RAISE_APPLICATION_ERROR(-20001, 'Время вылета не может быть позже или равно времени прилета.');
+                RAISE_APPLICATION_ERROR(-20001, 'Р’СЂРµРјСЏ РІС‹Р»РµС‚Р° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїРѕР·Р¶Рµ РёР»Рё СЂР°РІРЅРѕ РІСЂРµРјРµРЅРё РїСЂРёР»РµС‚Р°.');
             END IF;
 
-            -- Обновленная часть с исключением flight_number
+            -- РћР±РЅРѕРІР»РµРЅРЅР°СЏ С‡Р°СЃС‚СЊ СЃ РёСЃРєР»СЋС‡РµРЅРёРµРј flight_number
             MERGE INTO Flights t
             USING (
                 SELECT v_flight_id AS flight_id FROM DUAL
@@ -853,15 +853,15 @@ BEGIN
             WHEN DUP_VAL_ON_INDEX THEN
                 NULL;
             WHEN OTHERS THEN
-                DBMS_OUTPUT.PUT_LINE('Ошибка при импорте Flights: ' || sqlerrm || ' Данные: ' || l_json_data);
+                DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ Flights: ' || sqlerrm || ' Р”Р°РЅРЅС‹Рµ: ' || l_json_data);
                 RETURN;
         END;
     END LOOP;
 
-    -- Закрытие файла
+    -- Р—Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
     UTL_FILE.FCLOSE(l_file);
 
-    DBMS_OUTPUT.PUT_LINE('Импорт таблицы Flights завершен успешно.');
+    DBMS_OUTPUT.PUT_LINE('РРјРїРѕСЂС‚ С‚Р°Р±Р»РёС†С‹ Flights Р·Р°РІРµСЂС€РµРЅ СѓСЃРїРµС€РЅРѕ.');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -869,7 +869,7 @@ EXCEPTION
             UTL_FILE.FCLOSE(l_file);
         END IF;
 
-        DBMS_OUTPUT.PUT_LINE('Ошибка при выполнении процедуры: ' || sqlerrm);
+        DBMS_OUTPUT.PUT_LINE('РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РїСЂРѕС†РµРґСѓСЂС‹: ' || sqlerrm);
 END import_flights;
 /
 

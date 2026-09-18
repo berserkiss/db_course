@@ -13,14 +13,14 @@ END;
 
 BEGIN
     admin.sp_login_user(
-        p_username => 'user13', -- Логин, email или телефон
+        p_username => 'user13', -- Р›РѕРіРёРЅ, email РёР»Рё С‚РµР»РµС„РѕРЅ
         p_user_password => 'password13'
     );
 END;
 /
 
 BEGIN
-    admin.sp_get_user_info(4); -- Здесь указывается ID пользователя
+    admin.sp_get_user_info(4); -- Р—РґРµСЃСЊ СѓРєР°Р·С‹РІР°РµС‚СЃСЏ ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 END;
 
 EXEC admin.sp_user_search_available_flights();
@@ -46,12 +46,12 @@ END;
 /
 
 BEGIN
-    -- Вызов процедуры 'book_ticket'
+    -- Р’С‹Р·РѕРІ РїСЂРѕС†РµРґСѓСЂС‹ 'book_ticket'
     book_ticket(
-        p_user_id => 5, -- ID пользователя
-        p_flight_id => 6, -- ID рейса
-        p_class => 'Economy', -- Класс билета
-        p_seat_number => '20E' -- Номер места
+        p_user_id => 5, -- ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+        p_flight_id => 6, -- ID СЂРµР№СЃР°
+        p_class => 'Economy', -- РљР»Р°СЃСЃ Р±РёР»РµС‚Р°
+        p_seat_number => '20E' -- РќРѕРјРµСЂ РјРµСЃС‚Р°
     );
 END;
 /
