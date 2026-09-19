@@ -31,7 +31,7 @@ view instead of the table.
 
 ```
 db_course/
-├── schema/      roles, users, tables, seed rows
+├── schema/      roles, users, tables, seed rows, the key loader
 ├── procedures/  the stored procedures, by audience
 ├── data/        JSON exports of every table, plus a 100k-row load
 ├── scenarios/   scripts that call the procedures as each role would
@@ -40,13 +40,14 @@ db_course/
 
 | File | Contains |
 | --- | --- |
-| `schema/roles_users_tables.sql` | 3 roles, 4 users, 8 tables, the `GRANT EXECUTE` list, seed rows |
+| `schema/roles_users_tables.sql` | 3 roles, 4 users, 9 tables, the `GRANT EXECUTE` list, seed rows |
 | `procedures/admin.sql` | `pkg_crypto_utils`, two triggers generating flight and ticket numbers, the masking views, 7 admin procedures |
 | `procedures/general.sql` | 9 procedures every role uses: register, sign in, search, book, cancel |
 | `procedures/employee.sql` | 12 procedures for airport staff: flights, tickets, analytics |
 | `procedures/json.sql` | 16 export/import procedures, reading and writing the files in `data/` through `UTL_FILE` |
 | `data/insert_100k.sql` | bulk load and two indexes, for testing on a realistic volume |
 | `scenarios/*.sql` | example calls, one file per role |
+| `schema/crypto_key.example.sql` | template for the gitignored file holding the encryption key |
 
 ## Running it
 
