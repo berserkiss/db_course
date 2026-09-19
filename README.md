@@ -31,7 +31,7 @@ view instead of the table.
 
 ```
 db_course/
-├── schema/      roles, users, tables, seed rows, the key loader
+├── schema/      roles, users, tables, indexes, seed rows, the key loader
 ├── procedures/  the stored procedures, by audience
 ├── data/        JSON exports of every table, plus a 100k-row load
 ├── scenarios/   scripts that call the procedures as each role would
@@ -48,6 +48,7 @@ db_course/
 | `data/insert_100k.sql` | bulk load and two indexes, for testing on a realistic volume |
 | `scenarios/*.sql` | example calls, one file per role |
 | `schema/crypto_key.example.sql` | template for the gitignored file holding the encryption key |
+| `schema/indexes.sql` | an index per foreign key, plus one on `Flights.departure_time` |
 
 ## Running it
 
@@ -57,12 +58,13 @@ the objects live in that schema.
 ```
 1. schema/roles_users_tables.sql   -- roles, users, tables
 2. schema/crypto_key.sql           -- the encryption key, see below
-3. procedures/admin.sql            -- pkg_crypto_utils first: the rest compile against it
-4. procedures/general.sql
-5. procedures/employee.sql
-6. procedures/json.sql
-7. re-run the GRANT EXECUTE block at the top of schema/roles_users_tables.sql
-8. data/insert_100k.sql            -- optional, for volume testing
+3. schema/indexes.sql              -- foreign key indexes, see below
+4. procedures/admin.sql            -- pkg_crypto_utils first: the rest compile against it
+5. procedures/general.sql
+6. procedures/employee.sql
+7. procedures/json.sql
+8. re-run the GRANT EXECUTE block at the top of schema/roles_users_tables.sql
+9. data/insert_100k.sql            -- optional, for volume testing
 ```
 
 Step 2 needs a file that is not in the repository. Copy
@@ -77,13 +79,28 @@ Then `scenarios/user.sql` as `app_user`, `scenarios/employee.sql` as
 `/opt/oracle/oradata/XE/TablesJson`. The files in `data/` have to be in that
 directory on the database host for the import procedures to find them.
 
+## Indexes
+
+Oracle indexes a primary key and a unique constraint by itself. It does not
+index a foreign key, and in this schema there are eleven of them.
+
+That omission is not only about join speed. Deleting or updating a parent
+key takes a share lock on the entire child table while Oracle looks for
+orphaned rows, and holds it for the length of the statement. Remove one
+airport with no index on `Flights.departure_airport_id` and every flight row
+is locked for the duration.
+
+`schema/indexes.sql` adds one index per foreign key, and one on
+`Flights.departure_time`, which appears in the predicate of every flight
+search.
+
 ## Known issues
 
 Written down rather than left to be discovered.
 
 - **Step 7 exists because of an ordering problem.** The `GRANT EXECUTE`
   statements sit at the top of `schema/roles_users_tables.sql`, and they
-  name procedures that do not exist until steps 3 to 6 have run. On the
+  name procedures that do not exist until steps 4 to 7 have run. On the
   first pass they all error. Splitting that file into schema and grants
   would remove the step.
 - **The encryption key was in the source, and is still in the history.**
