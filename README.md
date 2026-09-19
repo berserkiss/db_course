@@ -82,7 +82,7 @@ Written down rather than left to be discovered.
 
 - **Step 7 exists because of an ordering problem.** The `GRANT EXECUTE`
   statements sit at the top of `schema/roles_users_tables.sql`, and they
-  name procedures that do not exist until steps 2 to 5 have run. On the
+  name procedures that do not exist until steps 3 to 6 have run. On the
   first pass they all error. Splitting that file into schema and grants
   would remove the step.
 - **The encryption key was in the source, and is still in the history.**
