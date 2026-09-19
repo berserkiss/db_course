@@ -1,2 +1,5 @@
 .idea/
 *.iml
+
+# The real encryption key. See schema/crypto_key.example.sql.
+schema/crypto_key.sql

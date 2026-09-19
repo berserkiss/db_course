@@ -55,13 +55,19 @@ the objects live in that schema.
 
 ```
 1. schema/roles_users_tables.sql   -- roles, users, tables
-2. procedures/admin.sql            -- pkg_crypto_utils first: the rest compile against it
-3. procedures/general.sql
-4. procedures/employee.sql
-5. procedures/json.sql
-6. re-run the GRANT EXECUTE block at the top of schema/roles_users_tables.sql
-7. data/insert_100k.sql            -- optional, for volume testing
+2. schema/crypto_key.sql           -- the encryption key, see below
+3. procedures/admin.sql            -- pkg_crypto_utils first: the rest compile against it
+4. procedures/general.sql
+5. procedures/employee.sql
+6. procedures/json.sql
+7. re-run the GRANT EXECUTE block at the top of schema/roles_users_tables.sql
+8. data/insert_100k.sql            -- optional, for volume testing
 ```
+
+Step 2 needs a file that is not in the repository. Copy
+`schema/crypto_key.example.sql` to `schema/crypto_key.sql` and put a key in
+it (`openssl rand -base64 32`). Without it the package raises ORA-20100 the
+first time anything is encrypted, rather than failing somewhere confusing.
 
 Then `scenarios/user.sql` as `app_user`, `scenarios/employee.sql` as
 `employee_user`, `scenarios/admin.sql` as `admin`.
@@ -74,20 +80,24 @@ directory on the database host for the import procedures to find them.
 
 Written down rather than left to be discovered.
 
-- **`procedures/admin.sql` drops the package it has just created.** There is
-  a `DROP PACKAGE pkg_crypto_utils;` at line 90, left over from
-  experimenting. Run the file as it stands and every procedure that
-  encrypts anything fails to compile. Comment that line out before running.
-- **Step 6 exists because of an ordering problem.** The `GRANT EXECUTE`
+- **Step 7 exists because of an ordering problem.** The `GRANT EXECUTE`
   statements sit at the top of `schema/roles_users_tables.sql`, and they
   name procedures that do not exist until steps 2 to 5 have run. On the
   first pass they all error. Splitting that file into schema and grants
   would remove the step.
-- **The encryption key is in the source.** `pkg_crypto_utils` carries its
-  AES key as a literal, so the ciphertext and the key that opens it live in
-  the same repository. Acceptable for a course project with invented data;
-  not a pattern to reuse.
+- **The encryption key was in the source, and is still in the history.**
+  `pkg_crypto_utils` used to carry its AES key as a literal; it reads it
+  from `crypto_config` now, and the file holding the value is gitignored.
+  That does not undo anything: the old commits still contain the key, and
+  `data/users.json` holds ciphertext made with it, so both are public
+  together. The real remedy is to generate a new key and re-export, which
+  needs a database to run against. The data is invented, so this is noted
+  rather than urgent.
 - **The database users are created with the password `password`.** Change
   them before this touches anything real.
+- **Keeping the key in a table is hygiene, not security.** It stops the key
+  travelling in version control, but it now sits in the database it
+  protects, readable by anyone who can read that table. A wallet or an
+  external key store is what this would need to be more than tidy.
 - **`data/airplane_types.json` is 17 MB**, which is almost the whole
   repository. It is a legitimate export, but it makes the clone heavy.

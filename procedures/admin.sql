@@ -33,19 +33,36 @@ END;
 
 
 
-CREATE PACKAGE pkg_crypto_utils AUTHID DEFINER AS
+CREATE OR REPLACE PACKAGE pkg_crypto_utils AUTHID DEFINER AS
     FUNCTION encrypt_data(p_data IN NVARCHAR2) RETURN NVARCHAR2;
     FUNCTION decrypt_data(p_encrypted_data IN NVARCHAR2) RETURN NVARCHAR2;
 END pkg_crypto_utils;
 /
 
-CREATE PACKAGE BODY pkg_crypto_utils AS
+CREATE OR REPLACE PACKAGE BODY pkg_crypto_utils AS
     ctype CONSTANT PLS_INTEGER := DBMS_CRYPTO.ENCRYPT_AES256
                                   + DBMS_CRYPTO.CHAIN_CBC
                                   + DBMS_CRYPTO.PAD_PKCS5;
-    key CONSTANT RAW(32) := UTL_ENCODE.BASE64_DECODE(
-        UTL_I18N.STRING_TO_RAW('pMV3D4xhyfNxp3YyfLWzAErGcKkIjK3X6uc/WIeVTls=', 'AL32UTF8')
-    );
+
+    -- Read from admin.crypto_config rather than written here. A key beside
+    -- the data it protects, in a file that goes into version control, is
+    -- the one arrangement that guarantees both are disclosed together.
+    -- See schema/crypto_key.example.sql.
+    FUNCTION data_key RETURN RAW IS
+        l_key_base64 VARCHAR2(200);
+    BEGIN
+        SELECT key_value INTO l_key_base64
+        FROM admin.crypto_config
+        WHERE key_name = 'DATA_KEY';
+
+        RETURN UTL_ENCODE.BASE64_DECODE(UTL_I18N.STRING_TO_RAW(l_key_base64, 'AL32UTF8'));
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RAISE_APPLICATION_ERROR(
+                -20100,
+                'No DATA_KEY in admin.crypto_config - run schema/crypto_key.sql first.'
+            );
+    END data_key;
 
     FUNCTION encrypt_data(p_data IN NVARCHAR2) RETURN NVARCHAR2 IS
         l_encrypted_data RAW(2000);
@@ -55,7 +72,7 @@ CREATE PACKAGE BODY pkg_crypto_utils AS
         l_encrypted_data := DBMS_CRYPTO.ENCRYPT(
             UTL_I18N.STRING_TO_RAW(p_data, 'AL32UTF8'),
             ctype,
-            key
+            data_key
         );
 
         -- Кодируем зашифрованные данные в Base64
@@ -76,7 +93,7 @@ CREATE PACKAGE BODY pkg_crypto_utils AS
         l_decrypted_data := DBMS_CRYPTO.DECRYPT(
             l_encrypted_data,
             ctype,
-            key
+            data_key
         );
 
         -- Преобразуем RAW в текст
@@ -86,8 +103,6 @@ CREATE PACKAGE BODY pkg_crypto_utils AS
     END decrypt_data;
 END pkg_crypto_utils;
 /
-
-DROP PACKAGE pkg_crypto_utils;
 
 
 --view for masking
